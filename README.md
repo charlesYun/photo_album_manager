@@ -12,7 +12,7 @@ This is the plug-in can quickly get album resources, support for android and iOS
 
 ```yaml
 dependencies:
-album_manager: 0.0.1
+photo_album_manager: ^1.0.0
 ```
 
 ## import
@@ -21,9 +21,4 @@ album_manager: 0.0.1
 import 'package:album_manager/photo_album_manager.dart';
 ```
 
-## use
-
-see the example/lib/main.dart
-
-or see next
 
