@@ -12,7 +12,7 @@ This is the plug-in can quickly get album resources, support for android and iOS
 
 ```yaml
 dependencies:
-photo_album_manager: ^1.0.0
+photo_album_manager: ^1.0.1
 ```
 
 ## import
