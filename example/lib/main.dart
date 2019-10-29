@@ -21,7 +21,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> initPlatformState() async {
-    photos = await PhotoAlbumManager.getAscAlbumImg(maxCount: 100);
+    photos = await PhotoAlbumManager.getAscAlbumImg(maxCount: 20);
     setState(() {});
   }
 

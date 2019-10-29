@@ -75,7 +75,7 @@ class PhotoAlbumManager {
         }
       });
       List list =
-      await _channel.invokeMethod('getOriginalResource', localIdentifier);
+          await _channel.invokeMethod('getOriginalResource', localIdentifier);
       if (list == null && list.length == 0) {
         onError("加载失败，请重试");
         return null;
@@ -83,7 +83,8 @@ class PhotoAlbumManager {
       AlbumModelEntity model = AlbumModelEntity.fromJson(list.first);
       return model;
     } else {
-      List list = await _channel.invokeMethod('getOriginalResource', localIdentifier);
+      List list =
+          await _channel.invokeMethod('getOriginalResource', localIdentifier);
       List<AlbumModelEntity> album = List();
       list.forEach((item) => album.add(AlbumModelEntity.fromJson(item)));
       return album.first;

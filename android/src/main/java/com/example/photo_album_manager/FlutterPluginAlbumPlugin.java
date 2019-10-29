@@ -13,6 +13,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -30,19 +31,18 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
+import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /**
  * FlutterPluginAlbumPlugin
  */
-public class FlutterPluginAlbumPlugin implements MethodCallHandler, ActivityCompat.OnRequestPermissionsResultCallback {
+public class FlutterPluginAlbumPlugin implements MethodCallHandler, PluginRegistry.RequestPermissionsResultListener {
 
     /*权限code*/
     private static final int REQUEST_PERMISSION = 10002;
 
     /*SD 路径*/
-    @SuppressLint("SdCardPath")
-    private static final String SD_PATH = "/sdcard/thumbnail/pic/";
     private static final String IN_PATH = "/thumbnail/pic/";
 
     //资源类型
@@ -157,7 +157,7 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler, ActivityComp
         File filePic;
         if (Environment.getExternalStorageState().equals(
                 Environment.MEDIA_MOUNTED)) {
-            savePath = SD_PATH;
+            savePath = Environment.getExternalStorageDirectory().getAbsolutePath() + IN_PATH;
         } else {
             savePath = context.getApplicationContext().getFilesDir()
                     .getAbsolutePath()
@@ -187,57 +187,58 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler, ActivityComp
 
     /*获取相册资源*/
     private void getAblumData(boolean asc, boolean image, boolean video, int maxCount, String localIdentifier) {
-        /*权限判断*/
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && (ContextCompat.checkSelfPermission(registrar.context(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
-            this.asc = asc;
-            this.maxCount = maxCount;
-            ActivityCompat.requestPermissions(registrar.activity(), new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_PERMISSION);
-        } else {
-            List<AlbumModelEntity> albumList = new ArrayList<>();
-            if (image) {
-                List<AlbumModelEntity> images = getSystemPhotoList(asc, maxCount, localIdentifier);
-                if (images != null && images.size() > 0) {
-                    albumList.addAll(images);
-                }
+        this.asc = asc;
+        this.maxCount = maxCount;
+        List<AlbumModelEntity> albumList = new ArrayList<>();
+        if (image) {
+            List<AlbumModelEntity> images = getSystemPhotoList(asc, maxCount, localIdentifier);
+            if (images != null && images.size() > 0) {
+                albumList.addAll(images);
             }
-            if (video) {
-                List<AlbumModelEntity> videos = getSystemVideoList(asc, maxCount, localIdentifier);
-                if (videos != null && videos.size() > 0) {
-                    albumList.addAll(videos);
-                }
-            }
-            Collections.sort(albumList, new Comparator<AlbumModelEntity>() {
-                @Override
-                public int compare(AlbumModelEntity o1, AlbumModelEntity o2) {
-                    int id1 = Integer.parseInt(String.valueOf(o1.getId()));
-                    int id2 = Integer.parseInt(String.valueOf(o2.getId()));
-                    if (id1 > id2) {
-                        return -1;
-                    } else if (id1 < id2) {
-                        return 1;
-                    }
-                    return 0;
-                }
-            });
-            /*判断是否超出maxCount*/
-            if (maxCount > 0 && albumList.size() > maxCount) {
-                albumList = albumList.subList(0, maxCount);
-            }
-            List<Map<String, String>> mapList = new ArrayList<>();
-            for (AlbumModelEntity entity : albumList) {
-                mapList.add(entity.toMap());
-            }
-            this.result.success(mapList);
         }
+        if (video) {
+            List<AlbumModelEntity> videos = getSystemVideoList(asc, maxCount, localIdentifier);
+            if (videos != null && videos.size() > 0) {
+                albumList.addAll(videos);
+            }
+        }
+        Collections.sort(albumList, new Comparator<AlbumModelEntity>() {
+            @Override
+            public int compare(AlbumModelEntity o1, AlbumModelEntity o2) {
+                int id1 = Integer.parseInt(String.valueOf(o1.getId()));
+                int id2 = Integer.parseInt(String.valueOf(o2.getId()));
+                if (id1 > id2) {
+                    return -1;
+                } else if (id1 < id2) {
+                    return 1;
+                }
+                return 0;
+            }
+        });
+        /*判断是否超出maxCount*/
+        if (maxCount > 0 && albumList.size() > maxCount) {
+            albumList = albumList.subList(0, maxCount);
+        }
+        List<Map<String, String>> mapList = new ArrayList<>();
+        for (AlbumModelEntity entity : albumList) {
+            mapList.add(entity.toMap());
+        }
+        this.result.success(mapList);
+
     }
 
 
     /**
      * Plugin registration.
      */
+    @RequiresApi(api = Build.VERSION_CODES.M)
     public static void registerWith(Registrar registrar) {
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "photo_album_manager");
         channel.setMethodCallHandler(new FlutterPluginAlbumPlugin(registrar));
+        /*权限判断*/
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ((ContextCompat.checkSelfPermission(registrar.context(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) || (ContextCompat.checkSelfPermission(registrar.context(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED))) {
+            registrar.activity().requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSION);
+        }
     }
 
     @Override
@@ -305,12 +306,13 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler, ActivityComp
 
     /*获取权限后回调*/
     @Override
-    public void onRequestPermissionsResult(int i, @NonNull String[] strings, @NonNull int[] ints) {
+    public boolean onRequestPermissionsResult(int i, @NonNull String[] strings, @NonNull int[] ints) {
         if (i == REQUEST_PERMISSION) {
             if (ints.length > 0 && ints[0] == PackageManager.PERMISSION_GRANTED) {
                 getAblumData(this.asc, true, true, this.maxCount);
             }
         }
+        return true;
     }
 }
 
