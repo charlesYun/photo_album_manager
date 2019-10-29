@@ -6,6 +6,10 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
+import com.example.photo_album_manager.MessageEvent;
+
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.List;
 
 import io.flutter.app.FlutterActivity;
@@ -29,15 +33,11 @@ public class MainActivity extends FlutterActivity implements EasyPermissions.Per
 
   @Override
   public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
-    if (requestCode == 0) {
-
-    }
+    EventBus.getDefault().post(new MessageEvent());
+    finish();
   }
 
   @Override
   public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
-      if (requestCode == 0) {
-
-      }
   }
 }

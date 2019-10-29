@@ -13,6 +13,10 @@ import android.provider.MediaStore;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -55,11 +59,18 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
     /*排序*/
     private boolean asc;
 
+    /*图片*/
+    private boolean image;
+
+    /*视频*/
+    private boolean video;
+
     /*构造方法*/
     private final Registrar registrar;
 
     private FlutterPluginAlbumPlugin(Registrar registrar) {
         this.registrar = registrar;
+        EventBus.getDefault().register(this);
     }
 
     /**
@@ -69,6 +80,13 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
     public static void registerWith(Registrar registrar) {
         final MethodChannel channel = new MethodChannel(registrar.messenger(), "photo_album_manager");
         channel.setMethodCallHandler(new FlutterPluginAlbumPlugin(registrar));
+
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void Event(MessageEvent messageEvent) {
+        getAblumData(asc, image, video, maxCount, null);
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -96,7 +114,7 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
             if (call.arguments != null) {
                 count = (int) call.arguments;
             }
-            getAblumData(false, true, false, count);
+            getAblumData(true, true, false, count);
         } else if (call.method.equals("getAscAlbumVideo")) {
             //顺序获取相册视频
             this.result = result;
@@ -104,7 +122,7 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
             if (call.arguments != null) {
                 count = (int) call.arguments;
             }
-            getAblumData(false, false, true, count);
+            getAblumData(true, false, true, count);
         } else if (call.method.equals("getDescAlbumImg")) {
             //逆序获取相册图片
             this.result = result;
@@ -112,7 +130,7 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
             if (call.arguments != null) {
                 count = (int) call.arguments;
             }
-            getAblumData(true, true, false, count);
+            getAblumData(false, true, false, count);
         } else if (call.method.equals("getDescAlbumVideo")) {
             //逆序获取相册视频
             this.result = result;
@@ -120,7 +138,7 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
             if (call.arguments != null) {
                 count = (int) call.arguments;
             }
-            getAblumData(true, false, true, count);
+            getAblumData(false, false, true, count);
         } else if (call.method.equals("getOriginalResource")) {
             //获取原始资源
             this.result = result;
@@ -136,19 +154,21 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
 
     /*获取相册资源*/
     private void getAblumData(boolean asc, boolean image, boolean video, int maxCount) {
+        this.asc = asc;
+        this.maxCount = maxCount;
+        this.image = image;
+        this.video = video;
         /*权限判断*/
         String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && EasyPermissions.hasPermissions(registrar.activity(),perms)) {
-            EasyPermissions.requestPermissions(registrar.activity(),"31312",REQUEST_PERMISSION,perms);
-//        } else {
-//            getAblumData(asc, image, video, maxCount, null);
-//        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !EasyPermissions.hasPermissions(registrar.activity(),perms)) {
+            EasyPermissions.requestPermissions(registrar.activity(),"需要获取相册权限",REQUEST_PERMISSION,perms);
+        } else {
+            getAblumData(asc, image, video, maxCount, null);
+        }
     }
 
     /*获取相册资源*/
     private void getAblumData(boolean asc, boolean image, boolean video, int maxCount, String localIdentifier) {
-        this.asc = asc;
-        this.maxCount = maxCount;
         List<AlbumModelEntity> albumList = new ArrayList<>();
         if (image) {
             List<AlbumModelEntity> images = getSystemPhotoList(asc, maxCount, localIdentifier);
@@ -209,7 +229,7 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
             File file = new File(path);
             if (file.exists()) {
                 AlbumModelEntity imgEntity = new AlbumModelEntity(creationDate, size, null, path, null, RESOURCE_IMAGE, localIdentifier, id);
-                Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Images.Thumbnails.MINI_KIND, null);
+                Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
                 if (bitmap != null) {
                     String thumbPath = saveBitmap(this.registrar.context(), bitmap);
                     if (thumbPath != null) {
@@ -252,7 +272,7 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
             File file = new File(path);
             if (file.exists()) {
                 AlbumModelEntity videoEntity = new AlbumModelEntity(creationDate, size, null, path, duration, RESOURCE_VIDEO, localIdentifier, id);
-                Bitmap bitmap = MediaStore.Video.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Video.Thumbnails.MINI_KIND, null);
+                Bitmap bitmap = MediaStore.Video.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Video.Thumbnails.MICRO_KIND, null);
                 if (bitmap != null) {
                     String thumbPath = saveBitmap(this.registrar.context(), bitmap);
                     if (thumbPath != null) {
