@@ -34,10 +34,10 @@ public class MainActivity extends FlutterActivity implements EasyPermissions.Per
   @Override
   public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
     EventBus.getDefault().post(new MessageEvent());
-    finish();
   }
 
   @Override
   public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
+
   }
 }
