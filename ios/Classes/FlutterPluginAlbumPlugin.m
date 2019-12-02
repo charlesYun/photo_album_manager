@@ -130,11 +130,13 @@ typedef void (^FlutterResult)(id _Nullable result);
     model.setLocalIdentifier(model.photoAsset.localIdentifier);
     
     //资源大小计算
-    PHAssetResource *resource = [[PHAssetResource assetResourcesForAsset:model.photoAsset] firstObject];
-    long long longValue = [[resource valueForKey:@"fileSize"] longLongValue];
-    NSNumber *longlongNumber = [NSNumber numberWithLongLong:longValue];
-    NSString *longlongStr = [longlongNumber stringValue];
-    model.setResourceSize(longlongStr).setCreationDate(model.photoAsset.creationDate);
+    if (@available(iOS 9, *)) {
+        PHAssetResource *resource = [[PHAssetResource assetResourcesForAsset:model.photoAsset] firstObject];
+        long long longValue = [[resource valueForKey:@"fileSize"] longLongValue];
+        NSNumber *longlongNumber = [NSNumber numberWithLongLong:longValue];
+        NSString *longlongStr = [longlongNumber stringValue];
+        model.setResourceSize(longlongStr).setCreationDate(model.photoAsset.creationDate);
+    }
     
     //先判断缩略图是否存在
     if ([manager fileExistsAtPath:cacheThumbPath]) {
@@ -189,11 +191,13 @@ typedef void (^FlutterResult)(id _Nullable result);
         }
     });
     
-    //判断是否存在于iCloud iOS10.0 以上生效
-    NSArray *resourceArray = [PHAssetResource assetResourcesForAsset: model.photoAsset];
-    BOOL locallyAvailable = [[resourceArray.firstObject valueForKey: @"locallyAvailable"] boolValue];
-    if (!locallyAvailable) {
-        return;
+    //判断是否存在于iCloud
+    if (@available(iOS 9, *)) {
+        NSArray *resourceArray = [PHAssetResource assetResourcesForAsset: model.photoAsset];
+        BOOL locallyAvailable = [[resourceArray.firstObject valueForKey: @"locallyAvailable"] boolValue];
+        if (!locallyAvailable && !localIdentifier) {
+            return;
+        }
     }
     if (model.photoAsset.mediaType == PHAssetMediaTypeImage) {
         //原图
