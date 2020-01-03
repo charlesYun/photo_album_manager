@@ -161,7 +161,7 @@ typedef void (^FlutterResult)(id _Nullable result);
             }
         }
         dispatch_group_leave(group);
-        if (model.thumbPath && !localIdentifier) {
+        if ((model.thumbPath && !localIdentifier) || (model.originalPath && localIdentifier)) {
             return;
         }
         dispatch_group_enter(group);
@@ -180,8 +180,6 @@ typedef void (^FlutterResult)(id _Nullable result);
                     BOOL boolValue = [thumbdata writeToFile:cacheThumbPath atomically:YES];
                     if (boolValue) {
                         model.setThumbPath(cacheThumbPath);
-                    }else {
-                        NSLog(@"写入失败");
                     }
                     dispatch_group_leave(group);
                 }else {
@@ -218,8 +216,6 @@ typedef void (^FlutterResult)(id _Nullable result);
                         BOOL boolValue = [imageData writeToFile:cacheImagePath atomically:YES];
                         if (boolValue) {
                             model.setOriginalPath(cacheImagePath);
-                        }else {
-                            NSLog(@"写入失败");
                         }
                         dispatch_group_leave(group);
                     }else {

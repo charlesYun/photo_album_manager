@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:photo_album_manager/photo_album_manager.dart';
 
-
 void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
@@ -47,11 +46,16 @@ class _MyAppState extends State<MyApp> {
               child: Card(
                 child: Stack(
                   children: <Widget>[
-                    ConstrainedBox(constraints: BoxConstraints.expand(),
-                      child: Image.file(File(model.thumbPath ?? model.originalPath),fit: BoxFit.cover,),),
+                    ConstrainedBox(
+                      constraints: BoxConstraints.expand(),
+                      child: Image.file(
+                        File(model.thumbPath ?? model.originalPath),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                     Offstage(
                       child: Center(
-                        child: Icon(Icons.play_circle_outline),
+                        child: Icon(Icons.play_circle_outline,size: 40,color: Colors.white,),
                       ),
                       offstage: model.resourceType == "image" ? true : false,
                     ),

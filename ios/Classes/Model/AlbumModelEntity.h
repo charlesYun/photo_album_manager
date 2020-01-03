@@ -48,7 +48,7 @@
 - (AlbumModelEntity *(^)(NSString *))setVideoDuration;
 
 /**
- 资源类型 image 或 video
+ 资源类型 image 或 video 或 gif
  */
 @property (nonatomic, copy) NSString *resourceType;
 - (AlbumModelEntity *(^)(NSString *))setResourceType;

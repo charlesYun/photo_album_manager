@@ -14,7 +14,7 @@ class AlbumModelEntity {
   /*创建时间*/
   String creationDate;
 
-  /*资源类型 image 或 video*/
+  /*资源类型 image 或 video 或 gif*/
   String resourceType;
 
   /*资源唯一标识(下载原图或原视频使用)*/
