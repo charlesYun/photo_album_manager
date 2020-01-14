@@ -138,21 +138,26 @@ typedef void (^FlutterResult)(id _Nullable result);
         model.setResourceSize(longlongStr).setCreationDate(model.photoAsset.creationDate);
     }
     
+    //资源类型
+    if (model.photoAsset.mediaType == PHAssetMediaTypeImage) {
+        if (isGif) {
+            model.setResourceType(kResourceGif);
+        }else {
+            model.setResourceType(kResourceImg);
+        }
+    }else if (model.photoAsset.mediaType == PHAssetMediaTypeVideo) {
+        model.setResourceType(kResourceVideo);
+    }
+    
     //先判断缩略图是否存在
     if ([manager fileExistsAtPath:cacheThumbPath]) {
         model.setThumbPath(cacheThumbPath);
         if (model.photoAsset.mediaType == PHAssetMediaTypeImage) {
-            if ([self isGif:assetName]) {
-                model.setResourceType(kResourceGif);
-            }else {
-                model.setResourceType(kResourceImg);
-            }
             //原图是否存在
             if ([manager fileExistsAtPath:cacheImagePath]) {
                 model.setOriginalPath(cacheImagePath);
             }
         }else if (model.photoAsset.mediaType == PHAssetMediaTypeVideo) {
-            model.setResourceType(kResourceVideo);
             //视频是否存在
             if ([manager fileExistsAtPath:cacheVideoPath]) {
                 model.setOriginalPath(cacheVideoPath);
@@ -170,14 +175,10 @@ typedef void (^FlutterResult)(id _Nullable result);
     //获取缩略图
     dispatch_async(queue, ^{
         @autoreleasepool {
-            CGFloat aspectRatio = model.photoAsset.pixelWidth / (CGFloat)model.photoAsset.pixelHeight;
-            CGFloat pixelWidth = UIScreen.mainScreen.bounds.size.width / 3.0f;
-            CGFloat pixelHeight = pixelWidth / aspectRatio;
-            CGSize imageSize = CGSizeMake(pixelWidth, pixelHeight);
-            [[PHImageManager defaultManager] requestImageForAsset:model.photoAsset targetSize:imageSize contentMode:PHImageContentModeAspectFill options:self.thumbOption resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
-                if (result) {
-                    NSData *thumbdata = UIImageJPEGRepresentation(result, 1);
-                    BOOL boolValue = [thumbdata writeToFile:cacheThumbPath atomically:YES];
+            [[PHImageManager defaultManager] requestImageDataForAsset:model.photoAsset options:self.thumbOption resultHandler:^(NSData * _Nullable imageData, NSString * _Nullable dataUTI, UIImageOrientation orientation, NSDictionary * _Nullable info) {
+                if (imageData) {
+                    UIImage *tempImage = [UIImage imageWithData:imageData];
+                    BOOL boolValue = [UIImageJPEGRepresentation(tempImage, 0.5) writeToFile:cacheThumbPath atomically:YES];
                     if (boolValue) {
                         model.setThumbPath(cacheThumbPath);
                     }
@@ -197,18 +198,13 @@ typedef void (^FlutterResult)(id _Nullable result);
             return;
         }
     }
+
     if (model.photoAsset.mediaType == PHAssetMediaTypeImage) {
         //原图
         dispatch_group_enter(group);
         dispatch_async(queue, ^{
             @autoreleasepool {
                 [[PHImageManager defaultManager] requestImageDataForAsset:model.photoAsset options:self.imageRequestOption resultHandler:^(NSData * _Nullable imageData, NSString * _Nullable dataUTI, UIImageOrientation orientation, NSDictionary * _Nullable info) {
-                    //判断GIF
-                    if ([dataUTI isEqualToString:(__bridge NSString *)kUTTypeGIF]) {
-                        model.setResourceType(kResourceGif);
-                    }else {
-                        model.setResourceType(kResourceImg);
-                    }
                     //是否存在Cloud端
                     if ([[info objectForKey:PHImageResultIsInCloudKey] boolValue] && ![info objectForKey:@"PHImageFileSandboxExtensionTokenKey"]) {
                         dispatch_group_leave(group);
@@ -230,7 +226,6 @@ typedef void (^FlutterResult)(id _Nullable result);
         dispatch_async(queue, ^{
             @autoreleasepool {
                 [[PHImageManager defaultManager] requestAVAssetForVideo:model.photoAsset options:self.videoRequestOption resultHandler:^(AVAsset * _Nullable asset, AVAudioMix * _Nullable audioMix, NSDictionary * _Nullable info) {
-                    model.setResourceType(kResourceVideo);
                     //是否存在Cloud端
                     if ([[info objectForKey:PHImageResultIsInCloudKey] boolValue] && ![info objectForKey:@"PHImageFileSandboxExtensionTokenKey"]) {
                         NSTimeInterval time = [model.photoAsset duration];
@@ -374,8 +369,8 @@ typedef void (^FlutterResult)(id _Nullable result);
 }
 
 #pragma mark - 是否是GIF判断
-- (BOOL)isGif:(NSString *)assetName {
-    if ([assetName.pathExtension isEqualToString:@"GIF"]) {
+- (BOOL)isGif:(NSString *)extension {
+    if ([extension isEqualToString:@"GIF"]) {
         return YES;
     }
     return NO;
@@ -483,6 +478,7 @@ typedef void (^FlutterResult)(id _Nullable result);
     if (!_thumbOption) {
         _thumbOption = [[PHImageRequestOptions alloc] init];
         _thumbOption.resizeMode = PHImageRequestOptionsResizeModeFast;
+        _thumbOption.deliveryMode = PHImageRequestOptionsDeliveryModeFastFormat;
         _thumbOption.networkAccessAllowed = YES;
         _thumbOption.synchronous = YES;
     }

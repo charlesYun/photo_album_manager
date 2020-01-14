@@ -20,7 +20,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> initPlatformState() async {
-    photos = await PhotoAlbumManager.getDescAlbumImg(maxCount: 100);
+    photos = await PhotoAlbumManager.getDescAlbum(maxCount: 30);
     setState(() {});
   }
 
@@ -57,7 +57,7 @@ class _MyAppState extends State<MyApp> {
                       child: Center(
                         child: Icon(Icons.play_circle_outline,size: 40,color: Colors.white,),
                       ),
-                      offstage: model.resourceType == "image" ? true : false,
+                      offstage: model.resourceType == "video" ? false : true,
                     ),
                   ],
                 ),

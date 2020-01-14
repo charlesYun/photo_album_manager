@@ -1,3 +1,4 @@
-## 1.0.4
+## 1.0.6
 
-* TODO: Describe initial release.
+* 优化iOS端GIF支持问题
+* 优化iOS端HEIC格式图片转换JPG问题
