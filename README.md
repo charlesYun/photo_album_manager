@@ -48,6 +48,9 @@ static Future<AlbumModelEntity> getOriginalImg(String localIdentifier,
 {void onProgress(double progress), void onError(String error)});
 ```
 
+
+```dart
 1.0.6 版本更新内容
 *优化iOS端GIF支持问题
 *优化iOS端HEIC格式图片转换JPG问题
+```
