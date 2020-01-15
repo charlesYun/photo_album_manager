@@ -17,7 +17,7 @@ photo_album_manager: ^1.0.6
 ## import
 
 ```dart
-import 'package:album_manager/photo_album_manager.dart';
+import 'package:photo_album_manager/photo_album_manager.dart';
 ```
 
 ## use
