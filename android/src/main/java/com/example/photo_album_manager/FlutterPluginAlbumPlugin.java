@@ -25,7 +25,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -160,8 +159,8 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
         this.video = video;
         /*权限判断*/
         String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !EasyPermissions.hasPermissions(registrar.activity(),perms)) {
-            EasyPermissions.requestPermissions(registrar.activity(),"需要获取相册权限",REQUEST_PERMISSION,perms);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !EasyPermissions.hasPermissions(registrar.activity(), perms)) {
+            EasyPermissions.requestPermissions(registrar.activity(), "需要获取相册权限", REQUEST_PERMISSION, perms);
         } else {
             getAblumData(asc, image, video, maxCount, null);
         }
@@ -231,7 +230,7 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
                 AlbumModelEntity imgEntity = new AlbumModelEntity(creationDate, size, null, path, null, RESOURCE_IMAGE, localIdentifier, id);
                 Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
                 if (bitmap != null) {
-                    String thumbPath = saveBitmap(this.registrar.context(), bitmap);
+                    String thumbPath = saveBitmap(this.registrar.context(), bitmap, localIdentifier);
                     if (thumbPath != null) {
                         imgEntity.setThumbPath(thumbPath);
                     }
@@ -274,7 +273,7 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
                 AlbumModelEntity videoEntity = new AlbumModelEntity(creationDate, size, null, path, duration, RESOURCE_VIDEO, localIdentifier, id);
                 Bitmap bitmap = MediaStore.Video.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Video.Thumbnails.MICRO_KIND, null);
                 if (bitmap != null) {
-                    String thumbPath = saveBitmap(this.registrar.context(), bitmap);
+                    String thumbPath = saveBitmap(this.registrar.context(), bitmap, localIdentifier);
                     if (thumbPath != null) {
                         videoEntity.setThumbPath(thumbPath);
                     }
@@ -292,7 +291,7 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
     }
 
     /*保存Bitmap到本地返回图片路径*/
-    private static String saveBitmap(Context context, Bitmap mBitmap) {
+    private static String saveBitmap(Context context, Bitmap mBitmap, String localIdentifier) {
         String savePath;
         File filePic;
         if (Environment.getExternalStorageState().equals(
@@ -304,7 +303,7 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
                     + IN_PATH;
         }
         try {
-            filePic = new File(savePath + UUID.randomUUID().toString() + ".jpg");
+            filePic = new File(savePath + localIdentifier + ".jpg");
             if (!filePic.exists()) {
                 filePic.getParentFile().mkdirs();
                 filePic.createNewFile();
