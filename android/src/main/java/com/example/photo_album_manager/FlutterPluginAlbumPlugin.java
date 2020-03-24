@@ -90,64 +90,79 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-        if (call.method.equals("getDescAlbum")) {
-            //逆序获取相册资源
-            this.result = result;
-            int count = 0;
-            if (call.arguments != null) {
-                count = (int) call.arguments;
+        switch (call.method) {
+            case "getDescAlbum": {
+                //逆序获取相册资源
+                this.result = result;
+                int count = 0;
+                if (call.arguments != null) {
+                    count = (int) call.arguments;
+                }
+                getAblumData(false, true, true, count);
+                break;
             }
-            getAblumData(false, true, true, count);
-        } else if (call.method.equals("getAscAlbum")) {
-            //顺序获取相册资源
-            this.result = result;
-            int count = 0;
-            if (call.arguments != null) {
-                count = (int) call.arguments;
+            case "getAscAlbum": {
+                //顺序获取相册资源
+                this.result = result;
+                int count = 0;
+                if (call.arguments != null) {
+                    count = (int) call.arguments;
+                }
+                getAblumData(true, true, true, count);
+                break;
             }
-            getAblumData(true, true, true, count);
-        } else if (call.method.equals("getAscAlbumImg")) {
-            //顺序获取相册图片
-            this.result = result;
-            int count = 0;
-            if (call.arguments != null) {
-                count = (int) call.arguments;
+            case "getAscAlbumImg": {
+                //顺序获取相册图片
+                this.result = result;
+                int count = 0;
+                if (call.arguments != null) {
+                    count = (int) call.arguments;
+                }
+                getAblumData(true, true, false, count);
+                break;
             }
-            getAblumData(true, true, false, count);
-        } else if (call.method.equals("getAscAlbumVideo")) {
-            //顺序获取相册视频
-            this.result = result;
-            int count = 0;
-            if (call.arguments != null) {
-                count = (int) call.arguments;
+            case "getAscAlbumVideo": {
+                //顺序获取相册视频
+                this.result = result;
+                int count = 0;
+                if (call.arguments != null) {
+                    count = (int) call.arguments;
+                }
+                getAblumData(true, false, true, count);
+                break;
             }
-            getAblumData(true, false, true, count);
-        } else if (call.method.equals("getDescAlbumImg")) {
-            //逆序获取相册图片
-            this.result = result;
-            int count = 0;
-            if (call.arguments != null) {
-                count = (int) call.arguments;
+            case "getDescAlbumImg": {
+                //逆序获取相册图片
+                this.result = result;
+                int count = 0;
+                if (call.arguments != null) {
+                    count = (int) call.arguments;
+                }
+                getAblumData(false, true, false, count);
+                break;
             }
-            getAblumData(false, true, false, count);
-        } else if (call.method.equals("getDescAlbumVideo")) {
-            //逆序获取相册视频
-            this.result = result;
-            int count = 0;
-            if (call.arguments != null) {
-                count = (int) call.arguments;
+            case "getDescAlbumVideo": {
+                //逆序获取相册视频
+                this.result = result;
+                int count = 0;
+                if (call.arguments != null) {
+                    count = (int) call.arguments;
+                }
+                getAblumData(false, false, true, count);
+                break;
             }
-            getAblumData(false, false, true, count);
-        } else if (call.method.equals("getOriginalResource")) {
-            //获取原始资源
-            this.result = result;
-            String localId = null;
-            if (call.arguments != null) {
-                localId = call.arguments.toString();
-            }
-            getAblumData(true, true, true, 1, localId);
-        } else {
-            result.notImplemented();
+            case "getOriginalResource":
+                //获取原始资源
+                this.result = result;
+                String localId = null;
+                if (call.arguments != null) {
+                    localId = call.arguments.toString();
+                }
+                getAblumData(true, true, true, 1, localId);
+                break;
+            default:
+                result.notImplemented();
+                break;
         }
     }
 
