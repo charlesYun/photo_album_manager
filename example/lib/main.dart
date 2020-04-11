@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:photo_album_manager/photo_album_manager.dart';
-import 'package:photo_album_manager/album_model_entity.dart';
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {

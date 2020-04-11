@@ -72,22 +72,21 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
 
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-        final MethodChannel channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "photo_album_manager");
+        final MethodChannel channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "photo_album_manager");
         this.context = flutterPluginBinding.getApplicationContext();
-        EventBus.getDefault().register(this);
         channel.setMethodCallHandler(this);
     }
 
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEventMainThread(MessageEvent messageEvent) {
+    @Subscribe(threadMode = ThreadMode.POSTING)
+    public void onMessageEvent(MessageEvent event) {
         getAblumData(asc, image, video, maxCount, null);
-        EventBus.getDefault().unregister(this);
     }
 
 
     @Override
     public void onAttachedToActivity(ActivityPluginBinding binding) {
         this.activity = binding.getActivity();
+        EventBus.getDefault().register(this);
     }
 
     @Override
@@ -101,7 +100,7 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
 
     @Override
     public void onDetachedFromActivity() {
-
+        EventBus.getDefault().unregister(this);
     }
 
     @Override
