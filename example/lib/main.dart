@@ -3,7 +3,10 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:photo_album_manager/photo_album_manager.dart';
 
-void main() => runApp(MyApp());
+void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(MyApp());
+}
 
 class MyApp extends StatefulWidget {
   @override
@@ -55,7 +58,11 @@ class _MyAppState extends State<MyApp> {
                     ),
                     Offstage(
                       child: Center(
-                        child: Icon(Icons.play_circle_outline,size: 40,color: Colors.white,),
+                        child: Icon(
+                          Icons.play_circle_outline,
+                          size: 40,
+                          color: Colors.white,
+                        ),
                       ),
                       offstage: model.resourceType == "video" ? false : true,
                     ),
@@ -65,10 +72,10 @@ class _MyAppState extends State<MyApp> {
               onTap: () {
                 PhotoAlbumManager.getOriginalImg(model.localIdentifier,
                     onProgress: (progress) {
-                      print("下载进度" + progress.toString());
-                    }, onError: (error) {
-                      print("下载错误" + error);
-                    }).then((value) {
+                  print("下载进度" + progress.toString());
+                }, onError: (error) {
+                  print("下载错误" + error);
+                }).then((value) {
                   print("下载完成" + value.originalPath);
                 });
               },

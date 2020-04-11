@@ -8,10 +8,9 @@ This is the plug-in can quickly get album resources, support for android and iOS
 
 ## install
 
-
 ```yaml
 dependencies:
-photo_album_manager: ^1.0.9
+photo_album_manager: ^1.1.1
 ```
 
 ## import
@@ -48,21 +47,57 @@ static Future<AlbumModelEntity> getOriginalImg(String localIdentifier,
 {void onProgress(double progress), void onError(String error)});
 ```
 
+## log
 
 ```dart
-1.0.6 版本更新内容
-*优化iOS端GIF支持问题
-*优化iOS端HEIC格式图片转换JPG问题
+1.1.1 版本更新内容
+*优化安卓端第一次相册权限申请后无法获取数据问题
+
+注意：如果没有自己提前申请相册权限需要添加以下操作，参考项目中的example
+
+1、EasyPermissions and EventBus is installed by adding the following dependency to your build.gradle file:
+
+dependencies {
+    // For developers using AndroidX in their applications
+    implementation 'pub.devrel:easypermissions:3.0.0'
+ 
+    // For developers using the Android Support Library
+    implementation 'pub.devrel:easypermissions:2.0.1'
+    
+    implementation 'org.greenrobot:eventbus:3.2.0'
+}
+
+2、MainActivity类修改
+
+public class MainActivity extends FlutterActivity implements EasyPermissions.PermissionCallbacks  {
+  @Override
+  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+    GeneratedPluginRegistrant.registerWith(flutterEngine);
+  }
+
+  @Override
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
+  }
+
+  /*权限通过*/
+  @Override
+  public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
+    EventBus.getDefault().post(new MessageEvent());
+  }
+
+  /*权限拒绝*/
+  @Override
+  public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
+  
+  }
+}
 ```
 
 ```dart
-1.0.7 版本更新内容
-*优化Android端缓存问题
-```
-
-```dart
-1.0.8 版本更新内容
-*适配版本v1.12.13+hotfix.9
+1.1.0 版本更新内容
+*优化安卓端相册权限申请
 ```
 
 ```dart
@@ -71,7 +106,22 @@ static Future<AlbumModelEntity> getOriginalImg(String localIdentifier,
 ```
 
 ```dart
-1.1.0 版本更新内容
-*优化安卓端相册权限申请
+1.0.8 版本更新内容
+*适配版本v1.12.13+hotfix.9
 ```
+
+```dart
+1.0.7 版本更新内容
+*优化Android端缓存问题
+```
+
+```dart
+1.0.6 版本更新内容
+*优化iOS端GIF支持问题
+*优化iOS端HEIC格式图片转换JPG问题
+```
+
+
+
+
 

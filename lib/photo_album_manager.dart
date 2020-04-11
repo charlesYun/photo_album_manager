@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'album_model_entity.dart';
 export 'album_model_entity.dart';
 
-
 class PhotoAlbumManager {
   /*flutter主动调用交互*/
   static const MethodChannel _channel =

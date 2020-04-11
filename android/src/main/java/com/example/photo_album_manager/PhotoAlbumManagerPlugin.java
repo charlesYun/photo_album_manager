@@ -45,6 +45,8 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
     /*SD 路径*/
     private static final String IN_PATH = "/thumbnail/pic/";
 
+    private static final String PHOTO_ALBUM_MANAGER = "photo_album_manager";
+
     //资源类型
     private static final String RESOURCE_VIDEO = "video";
     private static final String RESOURCE_IMAGE = "image";
@@ -70,11 +72,17 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
     /*Context*/
     private Context context;
 
+    /*新的插件注册方式*/
     @Override
     public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-        final MethodChannel channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), "photo_album_manager");
+        final MethodChannel channel = new MethodChannel(flutterPluginBinding.getBinaryMessenger(), PHOTO_ALBUM_MANAGER);
         this.context = flutterPluginBinding.getApplicationContext();
         channel.setMethodCallHandler(this);
+    }
+
+    @Override
+    public void onDetachedFromEngine(FlutterPluginBinding binding) {
+
     }
 
     @Subscribe(threadMode = ThreadMode.POSTING)
@@ -181,17 +189,23 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
         }
     }
 
+    /*权限申请*/
+    private boolean requestPermissions() {
+        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !EasyPermissions.hasPermissions(this.context, perms)) {
+            EasyPermissions.requestPermissions(this.activity, "需要获取相册权限", REQUEST_PERMISSION, perms);
+            return false;
+        }
+        return true;
+    }
+
     /*获取相册资源*/
     private void getAblumData(boolean asc, boolean image, boolean video, int maxCount) {
         this.asc = asc;
         this.maxCount = maxCount;
         this.image = image;
         this.video = video;
-        /*权限判断*/
-        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !EasyPermissions.hasPermissions(this.activity, perms)) {
-            EasyPermissions.requestPermissions(this.activity, "需要获取相册权限", REQUEST_PERMISSION, perms);
-        } else {
+        if (requestPermissions()) {
             getAblumData(asc, image, video, maxCount, null);
         }
     }
@@ -347,9 +361,5 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
             return null;
         }
         return filePic.getAbsolutePath();
-    }
-
-    @Override
-    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
     }
 }
