@@ -70,3 +70,8 @@ static Future<AlbumModelEntity> getOriginalImg(String localIdentifier,
 *优化安卓端相册权限申请
 ```
 
+```dart
+1.1.0 版本更新内容
+*优化安卓端相册权限申请
+```
+
