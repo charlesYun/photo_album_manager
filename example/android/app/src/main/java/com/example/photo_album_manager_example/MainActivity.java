@@ -1,10 +1,6 @@
 package com.example.photo_album_manager_example;
 
-import android.os.Build;
-import android.os.Bundle;
-
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import com.example.photo_album_manager.MessageEvent;
 
@@ -12,16 +8,15 @@ import org.greenrobot.eventbus.EventBus;
 
 import java.util.List;
 
-import io.flutter.app.FlutterActivity;
+import io.flutter.embedding.android.FlutterActivity;
+import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugins.GeneratedPluginRegistrant;
 import pub.devrel.easypermissions.EasyPermissions;
 
 public class MainActivity extends FlutterActivity implements EasyPermissions.PermissionCallbacks {
-  @RequiresApi(api = Build.VERSION_CODES.M)
   @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    GeneratedPluginRegistrant.registerWith(this);
+  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+    GeneratedPluginRegistrant.registerWith(flutterEngine);
   }
 
   /*获取权限后回调*/

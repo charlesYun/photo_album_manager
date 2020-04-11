@@ -1,27 +1,16 @@
-## use
+# photo_album_manager_example
 
-```dart
-/*主要方法如下*/
+Demonstrates how to use the photo_album_manager plugin.
 
-/*获取相册资源(降序) maxCount 为null 获取全部资源*/
-static Future<List<AlbumModelEntity>> getDescAlbum({int maxCount});
+## Getting Started
 
-/*获取相册资源(升序) maxCount 为null 获取全部资源*/
-static Future<List<AlbumModelEntity>> getAscAlbum({int maxCount});
+This project is a starting point for a Flutter application.
 
-/*获取相册图片资源(升序) maxCount 为null 获取全部资源*/
-static Future<List<AlbumModelEntity>> getAscAlbumImg({int maxCount});
+A few resources to get you started if this is your first Flutter project:
 
-/*获取相册视频资源(升序) maxCount 为null 获取全部资源*/
-static Future<List<AlbumModelEntity>> getAscAlbumVideo({int maxCount});
+- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
+- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
 
-/*获取相册图片资源(降序) maxCount 为null 获取全部资源*/
-static Future<List<AlbumModelEntity>> getDescAlbumImg({int maxCount});
-
-/*获取相册视频资源(降序) maxCount 为null 获取全部资源*/
-static Future<List<AlbumModelEntity>> getDescAlbumVideo{int maxCount});
-
-/*通过唯一标识localIdentifier 获取资源（原图、原视频）*/
-static Future<AlbumModelEntity> getOriginalImg(String localIdentifier,
-{void onProgress(double progress), void onError(String error)});
-```
+For help getting started with Flutter, view our
+[online documentation](https://flutter.dev/docs), which offers tutorials,
+samples, guidance on mobile development, and a full API reference.

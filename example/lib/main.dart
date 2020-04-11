@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:photo_album_manager/photo_album_manager.dart';
-
+import 'package:photo_album_manager/album_model_entity.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
@@ -65,10 +65,10 @@ class _MyAppState extends State<MyApp> {
               onTap: () {
                 PhotoAlbumManager.getOriginalImg(model.localIdentifier,
                     onProgress: (progress) {
-                  print("下载进度" + progress.toString());
-                }, onError: (error) {
-                  print("下载错误" + error);
-                }).then((value) {
+                      print("下载进度" + progress.toString());
+                    }, onError: (error) {
+                      print("下载错误" + error);
+                    }).then((value) {
                   print("下载完成" + value.originalPath);
                 });
               },

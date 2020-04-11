@@ -1,7 +1,7 @@
 package com.example.photo_album_manager;
 
-
 import android.Manifest;
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -11,7 +11,6 @@ import android.os.Environment;
 import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -26,18 +25,19 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.activity.ActivityAware;
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import io.flutter.plugin.common.PluginRegistry.Registrar;
 import pub.devrel.easypermissions.EasyPermissions;
 
 /**
- * FlutterPluginAlbumPlugin
+ * PhotoAlbumManagerPlugin
  */
-// ActivityCompat.OnRequestPermissionsResultCallback,
-public class FlutterPluginAlbumPlugin implements MethodCallHandler {
+public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
 
     /*权限code*/
     private static final int REQUEST_PERMISSION = 200;
@@ -64,28 +64,44 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
     /*视频*/
     private boolean video;
 
-    /*构造方法*/
-    private final Registrar registrar;
+    /*Activity*/
+    private Activity activity;
 
-    private FlutterPluginAlbumPlugin(Registrar registrar) {
-        this.registrar = registrar;
+    /*Context*/
+    private Context context;
+
+    @Override
+    public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+        final MethodChannel channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "photo_album_manager");
+        this.context = flutterPluginBinding.getApplicationContext();
         EventBus.getDefault().register(this);
-    }
-
-    /**
-     * Plugin registration.
-     */
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    public static void registerWith(Registrar registrar) {
-        final MethodChannel channel = new MethodChannel(registrar.messenger(), "photo_album_manager");
-        channel.setMethodCallHandler(new FlutterPluginAlbumPlugin(registrar));
-
+        channel.setMethodCallHandler(this);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void Event(MessageEvent messageEvent) {
+    public void onEventMainThread(MessageEvent messageEvent) {
         getAblumData(asc, image, video, maxCount, null);
         EventBus.getDefault().unregister(this);
+    }
+
+
+    @Override
+    public void onAttachedToActivity(ActivityPluginBinding binding) {
+        this.activity = binding.getActivity();
+    }
+
+    @Override
+    public void onDetachedFromActivityForConfigChanges() {
+
+    }
+
+    @Override
+    public void onReattachedToActivityForConfigChanges(ActivityPluginBinding binding) {
+    }
+
+    @Override
+    public void onDetachedFromActivity() {
+
     }
 
     @Override
@@ -174,8 +190,8 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
         this.video = video;
         /*权限判断*/
         String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !EasyPermissions.hasPermissions(registrar.activity(), perms)) {
-            EasyPermissions.requestPermissions(registrar.activity(), "需要获取相册权限", REQUEST_PERMISSION, perms);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !EasyPermissions.hasPermissions(this.activity, perms)) {
+            EasyPermissions.requestPermissions(this.activity, "需要获取相册权限", REQUEST_PERMISSION, perms);
         } else {
             getAblumData(asc, image, video, maxCount, null);
         }
@@ -224,7 +240,7 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
     private List<AlbumModelEntity> getSystemPhotoList(boolean asc, int maxCount, String localId) {
         List<AlbumModelEntity> result = new ArrayList<>();
         //按图片ID降序获取
-        ContentResolver contentResolver = registrar.context().getContentResolver();
+        ContentResolver contentResolver = this.context.getContentResolver();
         Cursor cursor;
         if (localId != null) {
             cursor = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, MediaStore.Images.Media._ID + " =?", new String[]{localId}, null,
@@ -245,7 +261,7 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
                 AlbumModelEntity imgEntity = new AlbumModelEntity(creationDate, size, null, path, null, RESOURCE_IMAGE, localIdentifier, id);
                 Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
                 if (bitmap != null) {
-                    String thumbPath = saveBitmap(this.registrar.context(), bitmap, localIdentifier);
+                    String thumbPath = saveBitmap(this.context, bitmap, localIdentifier);
                     if (thumbPath != null) {
                         imgEntity.setThumbPath(thumbPath);
                     }
@@ -266,7 +282,7 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
     private List<AlbumModelEntity> getSystemVideoList(boolean asc, int maxCount, String localId) {
         List<AlbumModelEntity> result = new ArrayList<>();
         //按视频ID降序获取
-        ContentResolver contentResolver = registrar.context().getContentResolver();
+        ContentResolver contentResolver = this.context.getContentResolver();
         Cursor cursor;
         if (localId != null) {
             cursor = contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, null, MediaStore.Video.Media._ID + " =?", new String[]{localId}, null,
@@ -288,7 +304,7 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
                 AlbumModelEntity videoEntity = new AlbumModelEntity(creationDate, size, null, path, duration, RESOURCE_VIDEO, localIdentifier, id);
                 Bitmap bitmap = MediaStore.Video.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Video.Thumbnails.MICRO_KIND, null);
                 if (bitmap != null) {
-                    String thumbPath = saveBitmap(this.registrar.context(), bitmap, localIdentifier);
+                    String thumbPath = saveBitmap(this.context, bitmap, localIdentifier);
                     if (thumbPath != null) {
                         videoEntity.setThumbPath(thumbPath);
                     }
@@ -334,5 +350,7 @@ public class FlutterPluginAlbumPlugin implements MethodCallHandler {
         return filePic.getAbsolutePath();
     }
 
+    @Override
+    public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
+    }
 }
-

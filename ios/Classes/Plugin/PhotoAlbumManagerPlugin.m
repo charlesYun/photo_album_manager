@@ -1,4 +1,4 @@
-#import "FlutterPluginAlbumPlugin.h"
+#import "PhotoAlbumManagerPlugin.h"
 #import <Photos/Photos.h>
 #import <MobileCoreServices/UTCoreTypes.h>
 #import "AlbumModelEntity.h"
@@ -15,7 +15,7 @@
 //回调
 typedef void (^FlutterResult)(id _Nullable result);
 
-@interface FlutterPluginAlbumPlugin ()<FlutterStreamHandler>
+@interface PhotoAlbumManagerPlugin ()<FlutterStreamHandler>
 
 @property (nonatomic, strong) PHImageRequestOptions *imageRequestOption;
 @property (nonatomic, strong) PHImageRequestOptions *thumbOption;
@@ -26,7 +26,7 @@ typedef void (^FlutterResult)(id _Nullable result);
 
 @end
 
-@implementation FlutterPluginAlbumPlugin
+@implementation PhotoAlbumManagerPlugin
 
 - (instancetype)init {
     if (self = [super init]) {
@@ -380,7 +380,7 @@ typedef void (^FlutterResult)(id _Nullable result);
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar>*)registrar {
     //flutter主动调用交互
     FlutterMethodChannel *channel = [FlutterMethodChannel methodChannelWithName:@"photo_album_manager" binaryMessenger:[registrar messenger]];
-    FlutterPluginAlbumPlugin *instance = [[FlutterPluginAlbumPlugin alloc] init];
+    PhotoAlbumManagerPlugin *instance = [[PhotoAlbumManagerPlugin alloc] init];
     [registrar addMethodCallDelegate:instance channel:channel];
     
     //原生主动调用交互

@@ -52,15 +52,13 @@ class AlbumModelEntity {
     /*对象转Map*/
     Map<String, String> toMap() {
         Map<String, String> data = new HashMap<>();
-        data.put("videoDuration",this.videoDuration);
-        data.put("resourceSize",this.resourceSize);
-        data.put("thumbPath",this.thumbPath);
-        data.put("originalPath",this.originalPath);
-        data.put("creationDate",this.creationDate);
-        data.put("resourceType",this.resourceType);
-        data.put("localIdentifier",this.localIdentifier);
+        data.put("videoDuration", this.videoDuration);
+        data.put("resourceSize", this.resourceSize);
+        data.put("thumbPath", this.thumbPath);
+        data.put("originalPath", this.originalPath);
+        data.put("creationDate", this.creationDate);
+        data.put("resourceType", this.resourceType);
+        data.put("localIdentifier", this.localIdentifier);
         return data;
     }
-
-
 }

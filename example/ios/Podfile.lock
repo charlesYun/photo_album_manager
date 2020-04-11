@@ -4,19 +4,19 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
-  - Flutter (from `.symlinks/flutter/ios`)
+  - Flutter (from `Flutter`)
   - photo_album_manager (from `.symlinks/plugins/photo_album_manager/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
-    :path: ".symlinks/flutter/ios"
+    :path: Flutter
   photo_album_manager:
     :path: ".symlinks/plugins/photo_album_manager/ios"
 
 SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
-  photo_album_manager: 69e01ff779dc628d6959110fdfa57701399d779d
+  photo_album_manager: c25d95cb4528e98cbd0c7300efa2f910d2fa27b2
 
-PODFILE CHECKSUM: 81d9101721a74b9b88ddd9e9dfe15eec968bc82e
+PODFILE CHECKSUM: 3dbe063e9c90a5d7c9e4e76e70a821b9e2c1d271
 
-COCOAPODS: 1.6.1
+COCOAPODS: 1.8.4
