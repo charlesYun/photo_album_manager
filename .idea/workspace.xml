@@ -3,6 +3,14 @@
   <component name="ChangeListManager">
     <list default="true" id="69efb0b9-93bd-45e1-8eb4-6c80a591faf2" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/ios/Flutter/flutter_export_environment.sh" beforeDir="false" afterPath="$PROJECT_DIR$/example/ios/Flutter/flutter_export_environment.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/ios/Runner.xcodeproj/project.pbxproj" beforeDir="false" afterPath="$PROJECT_DIR$/example/ios/Runner.xcodeproj/project.pbxproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/example/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/example/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/example/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Classes/Model/AlbumModelEntity.h" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Classes/Model/AlbumModelEntity.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Classes/Model/AlbumModelEntity.m" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Classes/Model/AlbumModelEntity.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ios/Classes/Plugin/PhotoAlbumManagerPlugin.m" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Classes/Plugin/PhotoAlbumManagerPlugin.m" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/photo_album_manager.iml" beforeDir="false" afterPath="$PROJECT_DIR$/photo_album_manager.iml" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />

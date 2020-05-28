@@ -37,6 +37,7 @@
     };
 }
 
+
 - (AlbumModelEntity * _Nonnull (^)(NSString * _Nonnull))setOriginalPath {
     return ^(NSString *tmp) {
         self.originalPath = tmp;

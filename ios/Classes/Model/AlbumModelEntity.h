@@ -8,6 +8,7 @@
 #import <Foundation/Foundation.h>
 
 @class PHAsset;
+@class FlutterStandardTypedData;
 
 @interface AlbumModelEntity : NSObject
 

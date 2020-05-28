@@ -85,6 +85,7 @@ typedef void (^FlutterResult)(id _Nullable result);
             [self.albumList removeAllObjects];
             dispatch_queue_t queue = dispatch_get_global_queue(0, 0);
             dispatch_group_t group = dispatch_group_create();
+            CFAbsoluteTime startTime = CFAbsoluteTimeGetCurrent();
             for (NSInteger i=0; i<result.count; i++) {
                 //获取maxCount固定数值 maxCount <= 0 表示全部
                 if (maxCount > 0 && i == maxCount) {
@@ -99,6 +100,9 @@ typedef void (^FlutterResult)(id _Nullable result);
                 [self getResource:model queue:queue group:group localIdentifier:localIdentifier];
             }
             dispatch_group_notify(group, queue, ^{
+                NSLog(@"加载完成");
+                CFAbsoluteTime endTime = (CFAbsoluteTimeGetCurrent() - startTime);
+                NSLog(@"方法耗时: %f ms", endTime * 1000.0);
                 [self.albumList sortUsingComparator:^NSComparisonResult(AlbumModelEntity * obj1, AlbumModelEntity *obj2) {
                     if (obj1.index < obj2.index) {
                         return NSOrderedAscending;
@@ -126,16 +130,25 @@ typedef void (^FlutterResult)(id _Nullable result);
     NSString *cacheThumbPath = [NSString stringWithFormat:@"%@/image/%@-thumb.jpg",kCachePath,assetName];
     NSString *cacheImagePath = [NSString stringWithFormat:@"%@/image/%@.%@",kCachePath,assetName,isGif ? @"gif" : @"jpg"];
     NSString *cacheVideoPath = [NSString stringWithFormat:@"%@/video/%@.mp4",kCachePath,assetName];
+    NSString *key = [NSString stringWithFormat:@"%@-fileSize",assetName];
     NSFileManager *manager = [NSFileManager defaultManager];
+    NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
     model.setLocalIdentifier(model.photoAsset.localIdentifier);
-    
+
     //资源大小计算
     if (@available(iOS 9, *)) {
-        PHAssetResource *resource = [[PHAssetResource assetResourcesForAsset:model.photoAsset] firstObject];
-        long long longValue = [[resource valueForKey:@"fileSize"] longLongValue];
-        NSNumber *longlongNumber = [NSNumber numberWithLongLong:longValue];
-        NSString *longlongStr = [longlongNumber stringValue];
-        model.setResourceSize(longlongStr).setCreationDate(model.photoAsset.creationDate);
+        NSDictionary *fileSize = [userDefaults objectForKey:key];
+        if (!fileSize) {
+            PHAssetResource *resource = [[PHAssetResource assetResourcesForAsset:model.photoAsset] firstObject];
+            long long longValue = [[resource valueForKey:@"fileSize"] longLongValue];
+            NSNumber *longlongNumber = [NSNumber numberWithLongLong:longValue];
+            NSString *longlongStr = [longlongNumber stringValue];
+            model.setResourceSize(longlongStr).setCreationDate(model.photoAsset.creationDate);
+            [userDefaults setObject:@{@"size":longlongStr,@"date":model.photoAsset.creationDate} forKey:key];
+            [userDefaults synchronize];
+        }else {
+            model.setResourceSize(fileSize[@"size"]).setCreationDate(fileSize[@"date"]);
+        }
     }
     
     //资源类型
@@ -175,20 +188,20 @@ typedef void (^FlutterResult)(id _Nullable result);
     //获取缩略图
     dispatch_async(queue, ^{
         @autoreleasepool {
-            [[PHImageManager defaultManager] requestImageDataForAsset:model.photoAsset options:self.thumbOption resultHandler:^(NSData * _Nullable imageData, NSString * _Nullable dataUTI, UIImageOrientation orientation, NSDictionary * _Nullable info) {
-                if (imageData) {
-                    UIImage *tempImage = [UIImage imageWithData:imageData];
-                    BOOL boolValue = [UIImageJPEGRepresentation(tempImage, 0.5) writeToFile:cacheThumbPath atomically:YES];
-                    if (boolValue) {
-                        model.setThumbPath(cacheThumbPath);
-                    }
-                    dispatch_group_leave(group);
-                }else {
-                    dispatch_group_leave(group);
+            [[PHImageManager defaultManager] requestImageForAsset:model.photoAsset targetSize:CGSizeMake(125, 125) contentMode:PHImageContentModeAspectFill options:self.thumbOption resultHandler:^(UIImage * _Nullable result, NSDictionary * _Nullable info) {
+                BOOL boolValue = [UIImagePNGRepresentation(result) writeToFile:cacheThumbPath atomically:YES];
+                if (boolValue) {
+                    model.setThumbPath(cacheThumbPath);
                 }
+                dispatch_group_leave(group);
             }];
         }
     });
+    
+    //默认不获取原始资源
+    if (!self.imageRequestOption.networkAccessAllowed && !self.videoRequestOption.networkAccessAllowed) {
+        return;
+    }
     
     //判断是否存在于iCloud
     if (@available(iOS 9, *)) {
@@ -464,6 +477,7 @@ typedef void (^FlutterResult)(id _Nullable result);
     if (!_imageRequestOption) {
         _imageRequestOption = [[PHImageRequestOptions alloc] init];
         _imageRequestOption.resizeMode = PHImageRequestOptionsResizeModeFast;
+        _thumbOption.deliveryMode = PHImageRequestOptionsDeliveryModeFastFormat;
         _imageRequestOption.synchronous = YES;
         _imageRequestOption.networkAccessAllowed = NO;
         __weak __typeof(self) weakself = self;
@@ -479,7 +493,7 @@ typedef void (^FlutterResult)(id _Nullable result);
         _thumbOption = [[PHImageRequestOptions alloc] init];
         _thumbOption.resizeMode = PHImageRequestOptionsResizeModeFast;
         _thumbOption.deliveryMode = PHImageRequestOptionsDeliveryModeFastFormat;
-        _thumbOption.networkAccessAllowed = YES;
+        _thumbOption.networkAccessAllowed = NO;
         _thumbOption.synchronous = YES;
     }
     return _thumbOption;
