@@ -10,7 +10,7 @@ This is the plug-in can quickly get album resources, support for android and iOS
 
 ```yaml
 dependencies:
-photo_album_manager: ^1.1.2
+photo_album_manager: ^1.1.3
 ```
 
 ## import
@@ -48,6 +48,11 @@ static Future<AlbumModelEntity> getOriginalImg(String localIdentifier,
 ```
 
 ## log
+
+```dart
+1.1.3 版本更新内容
+*优化安卓插件EventBus 因混淆导致的release版本异常
+```
 
 ```dart
 1.1.2 版本更新内容
