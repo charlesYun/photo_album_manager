@@ -5,6 +5,9 @@ This is the plug-in can quickly get album resources, support for android and iOS
 
 这是可以快速获取相册资源的插件，支持安卓和iOS
 
+## example
+安卓
+![二维码](https://www.pgyer.com/app/qrcode/SFcx?sign=&auSign=&code=)
 
 ## install
 
@@ -135,8 +138,3 @@ public class MainActivity extends FlutterActivity implements EasyPermissions.Per
 *优化iOS端GIF支持问题
 *优化iOS端HEIC格式图片转换JPG问题
 ```
-
-
-
-
-
