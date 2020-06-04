@@ -5,6 +5,9 @@ This is the plug-in can quickly get album resources, support for android and iOS
 
 这是可以快速获取相册资源的插件，支持安卓和iOS
 
+## example
+安卓
+![二维码](https://www.pgyer.com/app/qrcode/SFcx?sign=&auSign=&code=)
 
 ## install
 
@@ -22,53 +25,7 @@ import 'package:photo_album_manager/photo_album_manager.dart';
 ## use
 
 ```dart
-/*主要方法如下*/
-
-/*获取相册资源(降序) maxCount 为null 获取全部资源*/
-static Future<List<AlbumModelEntity>> getDescAlbum({int maxCount});
-
-/*获取相册资源(升序) maxCount 为null 获取全部资源*/
-static Future<List<AlbumModelEntity>> getAscAlbum({int maxCount});
-
-/*获取相册图片资源(升序) maxCount 为null 获取全部资源*/
-static Future<List<AlbumModelEntity>> getAscAlbumImg({int maxCount});
-
-/*获取相册视频资源(升序) maxCount 为null 获取全部资源*/
-static Future<List<AlbumModelEntity>> getAscAlbumVideo({int maxCount});
-
-/*获取相册图片资源(降序) maxCount 为null 获取全部资源*/
-static Future<List<AlbumModelEntity>> getDescAlbumImg({int maxCount});
-
-/*获取相册视频资源(降序) maxCount 为null 获取全部资源*/
-static Future<List<AlbumModelEntity>> getDescAlbumVideo{int maxCount});
-
-/*通过唯一标识localIdentifier 获取资源（原图、原视频）*/
-static Future<AlbumModelEntity> getOriginalImg(String localIdentifier,
-{void onProgress(double progress), void onError(String error)});
-```
-
-## log
-
-```dart
-1.1.4 版本更新内容
-*优化pubspec.yaml文件部分语法问题
-```
-
-```dart
-1.1.3 版本更新内容
-*优化安卓插件EventBus 因混淆导致的release版本异常
-```
-
-```dart
-1.1.2 版本更新内容
-*优化iOS相册加载速度
-```
-
-```dart
-1.1.1 版本更新内容
-*优化安卓端第一次相册权限申请后无法获取数据问题
-
-注意：如果没有自己提前申请相册权限需要添加以下操作，参考项目中的example
+安卓注意：如果没有自己提前申请相册权限需要添加以下操作，参考项目中的example
 
 1、EasyPermissions and EventBus is installed by adding the following dependency to your build.gradle file:
 
@@ -108,6 +65,66 @@ public class MainActivity extends FlutterActivity implements EasyPermissions.Per
   
   }
 }
+
+/*主要方法如下*/
+
+/*获取相册资源(降序) maxCount 为null 获取全部资源*/
+static Future<List<AlbumModelEntity>> getDescAlbum({int maxCount});
+
+/*获取相册资源(升序) maxCount 为null 获取全部资源*/
+static Future<List<AlbumModelEntity>> getAscAlbum({int maxCount});
+
+/*获取相册图片资源(升序) maxCount 为null 获取全部资源*/
+static Future<List<AlbumModelEntity>> getAscAlbumImg({int maxCount});
+
+/*获取相册视频资源(升序) maxCount 为null 获取全部资源*/
+static Future<List<AlbumModelEntity>> getAscAlbumVideo({int maxCount});
+
+/*获取相册图片资源(降序) maxCount 为null 获取全部资源*/
+static Future<List<AlbumModelEntity>> getDescAlbumImg({int maxCount});
+
+/*获取相册视频资源(降序) maxCount 为null 获取全部资源*/
+static Future<List<AlbumModelEntity>> getDescAlbumVideo{int maxCount});
+
+/*通过唯一标识localIdentifier 获取资源（原图、原视频）*/
+static Future<AlbumModelEntity> getOriginalImg(String localIdentifier,
+{void onProgress(double progress), void onError(String error)});
+```
+
+## android warning
+```dart
+执行 flutter build apk 如果抛出如下警告
+警告: 未知的枚举常量 ThreadMode.POSTING      
+  原因: 找不到org.greenrobot.eventbus.ThreadMode的类文件 
+  1 个警告 
+(代码混淆问题)
+
+参考example/android 项目
+1、把app目录下的proguard-rules.pro文件拷贝过去
+2、在build.gradle/buildTypes/release里面添加
+proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+```
+
+## log
+
+```dart
+1.1.4 版本更新内容
+*优化pubspec.yaml文件部分语法问题
+```
+
+```dart
+1.1.3 版本更新内容
+*优化安卓插件EventBus 因混淆导致的release版本异常
+```
+
+```dart
+1.1.2 版本更新内容
+*优化iOS相册加载速度
+```
+
+```dart
+1.1.1 版本更新内容
+*优化安卓端第一次相册权限申请后无法获取数据问题
 ```
 
 ```dart
@@ -135,8 +152,3 @@ public class MainActivity extends FlutterActivity implements EasyPermissions.Per
 *优化iOS端GIF支持问题
 *优化iOS端HEIC格式图片转换JPG问题
 ```
-
-
-
-
-
