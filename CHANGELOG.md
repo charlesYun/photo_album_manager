@@ -1,3 +1,6 @@
+## 1.1.4
+*优化pubspec.yaml文件部分语法问题
+
 ## 1.1.3
 *优化安卓插件EventBus 因混淆导致的release版本异常
 
