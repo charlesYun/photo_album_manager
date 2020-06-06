@@ -1,20 +1,13 @@
 package com.example.photo_album_manager;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,21 +19,16 @@ import java.util.List;
 import java.util.Map;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
-import io.flutter.embedding.engine.plugins.activity.ActivityAware;
-import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import pub.devrel.easypermissions.EasyPermissions;
 
 /**
  * PhotoAlbumManagerPlugin
  */
-public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
+public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler {
 
-    /*权限code*/
-    private static final int REQUEST_PERMISSION = 200;
 
     /*SD 路径*/
     private static final String IN_PATH = "/thumbnail/pic/";
@@ -66,9 +54,6 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
     /*视频*/
     private boolean video;
 
-    /*Activity*/
-    private Activity activity;
-
     /*Context*/
     private Context context;
 
@@ -83,32 +68,6 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
     @Override
     public void onDetachedFromEngine(FlutterPluginBinding binding) {
 
-    }
-
-    @Subscribe(threadMode = ThreadMode.POSTING)
-    public void onMessageEvent(MessageEvent event) {
-        getAblumData(asc, image, video, maxCount, null);
-    }
-
-
-    @Override
-    public void onAttachedToActivity(ActivityPluginBinding binding) {
-        this.activity = binding.getActivity();
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    public void onDetachedFromActivityForConfigChanges() {
-
-    }
-
-    @Override
-    public void onReattachedToActivityForConfigChanges(ActivityPluginBinding binding) {
-    }
-
-    @Override
-    public void onDetachedFromActivity() {
-        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -189,25 +148,13 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
         }
     }
 
-    /*权限申请*/
-    private boolean requestPermissions() {
-        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !EasyPermissions.hasPermissions(this.context, perms)) {
-            EasyPermissions.requestPermissions(this.activity, "需要获取相册权限", REQUEST_PERMISSION, perms);
-            return false;
-        }
-        return true;
-    }
-
     /*获取相册资源*/
     private void getAblumData(boolean asc, boolean image, boolean video, int maxCount) {
         this.asc = asc;
         this.maxCount = maxCount;
         this.image = image;
         this.video = video;
-        if (requestPermissions()) {
-            getAblumData(asc, image, video, maxCount, null);
-        }
+        getAblumData(asc, image, video, maxCount, null);
     }
 
     /*获取相册资源*/

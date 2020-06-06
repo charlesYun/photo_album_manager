@@ -1,3 +1,6 @@
+
+
+
 class AlbumModelEntity {
   /*视频时长(秒)*/
   String videoDuration;
