@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'album_model_entity.dart';
+
 export 'album_model_entity.dart';
-export 'package:permission_handler_platform_interface/permission_handler_platform_interface.dart';
+export 'package:permission_handler/permission_handler.dart';
+
 
 class PhotoAlbumManager {
   /*flutter主动调用交互*/
