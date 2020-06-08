@@ -20,12 +20,19 @@ import 'package:photo_album_manager/photo_album_manager.dart';
 
 ## example
 ```dart
+//先权限申请
 PermissionStatus status = await PhotoAlbumManager.checkPermissions();
 if (status == PermissionStatus.granted) {
   Toast.show("权限同意", context);
 } else {
   Toast.show("权限拒绝", context);
 }
+//再获取相册资源
+List<AlbumModelEntity> photos = await PhotoAlbumManager.getDescAlbum(maxCount: 50);
+```
+
+```dart
+//或者直接获取相册资源（权限内部判断）
 List<AlbumModelEntity> photos = await PhotoAlbumManager.getDescAlbum(maxCount: 50);
 ```
 
