@@ -3,15 +3,10 @@ package com.example.photo_album_manager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.os.Environment;
 import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -216,18 +211,9 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
             int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
             String localIdentifier = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
             String creationDate = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
-            File file = new File(path);
-            if (file.exists()) {
-                AlbumModelEntity imgEntity = new AlbumModelEntity(creationDate, size, null, path, null, RESOURCE_IMAGE, localIdentifier, id);
-                Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
-                if (bitmap != null) {
-                    String thumbPath = saveBitmap(this.context, bitmap, localIdentifier);
-                    if (thumbPath != null) {
-                        imgEntity.setThumbPath(thumbPath);
-                    }
-                }
-                result.add(imgEntity);
-            }
+            String thumbnail = getImageSystemThumbnail(id);
+            AlbumModelEntity imgEntity = new AlbumModelEntity(creationDate, size, thumbnail, path, null, RESOURCE_IMAGE, localIdentifier, id);
+            result.add(imgEntity);
             //获取maxCount固定数值 maxCount <= 0 表示全部
             if (maxCount > 0 && result.size() == maxCount) {
                 cursor.close();
@@ -259,18 +245,9 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
             int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
             String localIdentifier = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
             String creationDate = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
-            File file = new File(path);
-            if (file.exists()) {
-                AlbumModelEntity videoEntity = new AlbumModelEntity(creationDate, size, null, path, duration, RESOURCE_VIDEO, localIdentifier, id);
-                Bitmap bitmap = MediaStore.Video.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Video.Thumbnails.MICRO_KIND, null);
-                if (bitmap != null) {
-                    String thumbPath = saveBitmap(this.context, bitmap, localIdentifier);
-                    if (thumbPath != null) {
-                        videoEntity.setThumbPath(thumbPath);
-                    }
-                }
-                result.add(videoEntity);
-            }
+            String thumbnail = getVideoSystemThumbnail(id);
+            AlbumModelEntity videoEntity = new AlbumModelEntity(creationDate, size, thumbnail, path, duration, RESOURCE_VIDEO, localIdentifier, id);
+            result.add(videoEntity);
             //获取maxCount固定数值 maxCount <= 0 表示全部
             if (maxCount > 0 && result.size() == maxCount) {
                 cursor.close();
@@ -281,32 +258,42 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
         return result;
     }
 
-    /*保存Bitmap到本地返回图片路径*/
-    private static String saveBitmap(Context context, Bitmap mBitmap, String localIdentifier) {
-        String savePath;
-        File filePic;
-        if (Environment.getExternalStorageState().equals(
-                Environment.MEDIA_MOUNTED)) {
-            savePath = Environment.getExternalStorageDirectory().getAbsolutePath() + IN_PATH;
-        } else {
-            savePath = context.getApplicationContext().getFilesDir()
-                    .getAbsolutePath()
-                    + IN_PATH;
+    /*获取系统图片缩略图*/
+    private String getImageSystemThumbnail(int imageId) {
+        String thumbnail = null;
+        ContentResolver cr = this.context.getContentResolver();
+        Cursor cursor = cr.query(
+                MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI,
+                new String[]{
+                        MediaStore.Images.Thumbnails.DATA
+                },
+                MediaStore.Images.Thumbnails.IMAGE_ID + "=" + imageId,
+                null,
+                null);
+        if (cursor != null && cursor.moveToFirst()) {
+            thumbnail = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+            cursor.close();
         }
-        try {
-            filePic = new File(savePath + localIdentifier + ".jpg");
-            if (!filePic.exists()) {
-                filePic.getParentFile().mkdirs();
-                filePic.createNewFile();
-            }
-            FileOutputStream fos = new FileOutputStream(filePic);
-            mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            fos.flush();
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-        return filePic.getAbsolutePath();
+        return thumbnail;
     }
+
+    /*获取系统视频缩略图*/
+    private String getVideoSystemThumbnail(int videoId) {
+        String thumbnail = null;
+        ContentResolver cr = this.context.getContentResolver();
+        Cursor cursor = cr.query(
+                MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI,
+                new String[]{
+                        MediaStore.Video.Thumbnails.DATA
+                },
+                MediaStore.Video.Thumbnails.VIDEO_ID + "=" + videoId,
+                null,
+                null);
+        if (cursor != null && cursor.moveToFirst()) {
+            thumbnail = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA));
+            cursor.close();
+        }
+        return thumbnail;
+    }
+
 }
