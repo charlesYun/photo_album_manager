@@ -3,10 +3,15 @@ package com.example.photo_album_manager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.os.Environment;
 import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -212,6 +217,12 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
             String localIdentifier = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
             String creationDate = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
             String thumbnail = getImageSystemThumbnail(id);
+            if (thumbnail == null) {
+                Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
+                if (bitmap != null) {
+                    thumbnail = saveBitmap(this.context, bitmap, localIdentifier);
+                }
+            }
             AlbumModelEntity imgEntity = new AlbumModelEntity(creationDate, size, thumbnail, path, null, RESOURCE_IMAGE, localIdentifier, id);
             result.add(imgEntity);
             //获取maxCount固定数值 maxCount <= 0 表示全部
@@ -246,6 +257,12 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
             String localIdentifier = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
             String creationDate = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
             String thumbnail = getVideoSystemThumbnail(id);
+            if (thumbnail == null) {
+                Bitmap bitmap = MediaStore.Video.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Video.Thumbnails.MICRO_KIND, null);
+                if (bitmap != null) {
+                    thumbnail = saveBitmap(this.context, bitmap, localIdentifier);
+                }
+            }
             AlbumModelEntity videoEntity = new AlbumModelEntity(creationDate, size, thumbnail, path, duration, RESOURCE_VIDEO, localIdentifier, id);
             result.add(videoEntity);
             //获取maxCount固定数值 maxCount <= 0 表示全部
@@ -294,6 +311,35 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
             cursor.close();
         }
         return thumbnail;
+    }
+
+    /*保存Bitmap到本地返回图片路径*/
+    private static String saveBitmap(Context context, Bitmap mBitmap, String localIdentifier) {
+        String savePath;
+        File filePic;
+        if (Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            savePath = Environment.getExternalStorageDirectory().getAbsolutePath() + IN_PATH;
+        } else {
+            savePath = context.getApplicationContext().getFilesDir()
+                    .getAbsolutePath()
+                    + IN_PATH;
+        }
+        try {
+            filePic = new File(savePath + localIdentifier + ".jpg");
+            if (!filePic.exists()) {
+                filePic.getParentFile().mkdirs();
+                filePic.createNewFile();
+                FileOutputStream fos = new FileOutputStream(filePic);
+                mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                fos.flush();
+                fos.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return filePic.getAbsolutePath();
     }
 
 }
