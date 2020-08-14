@@ -1,20 +1,26 @@
 PODS:
   - Flutter (1.0.0)
+  - "permission_handler (5.0.0+hotfix.8)":
+    - Flutter
   - photo_album_manager (0.0.1):
     - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
+  - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
   - photo_album_manager (from `.symlinks/plugins/photo_album_manager/ios`)
 
 EXTERNAL SOURCES:
   Flutter:
     :path: Flutter
+  permission_handler:
+    :path: ".symlinks/plugins/permission_handler/ios"
   photo_album_manager:
     :path: ".symlinks/plugins/photo_album_manager/ios"
 
 SPEC CHECKSUMS:
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  permission_handler: c2a19c5cb3ed2d7054fc4baa8ff1b86f5dcfedfd
   photo_album_manager: c25d95cb4528e98cbd0c7300efa2f910d2fa27b2
 
 PODFILE CHECKSUM: 3dbe063e9c90a5d7c9e4e76e70a821b9e2c1d271

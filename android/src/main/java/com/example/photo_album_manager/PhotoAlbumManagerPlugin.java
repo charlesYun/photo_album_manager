@@ -1,20 +1,13 @@
 package com.example.photo_album_manager;
 
-import android.Manifest;
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,21 +19,16 @@ import java.util.List;
 import java.util.Map;
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
-import io.flutter.embedding.engine.plugins.activity.ActivityAware;
-import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
 import io.flutter.plugin.common.MethodChannel.Result;
-import pub.devrel.easypermissions.EasyPermissions;
 
 /**
  * PhotoAlbumManagerPlugin
  */
-public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler, ActivityAware {
+public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler {
 
-    /*权限code*/
-    private static final int REQUEST_PERMISSION = 200;
 
     /*SD 路径*/
     private static final String IN_PATH = "/thumbnail/pic/";
@@ -66,9 +54,6 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
     /*视频*/
     private boolean video;
 
-    /*Activity*/
-    private Activity activity;
-
     /*Context*/
     private Context context;
 
@@ -83,32 +68,6 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
     @Override
     public void onDetachedFromEngine(FlutterPluginBinding binding) {
 
-    }
-
-    @Subscribe(threadMode = ThreadMode.POSTING)
-    public void onMessageEvent(MessageEvent event) {
-        getAblumData(asc, image, video, maxCount, null);
-    }
-
-
-    @Override
-    public void onAttachedToActivity(ActivityPluginBinding binding) {
-        this.activity = binding.getActivity();
-        EventBus.getDefault().register(this);
-    }
-
-    @Override
-    public void onDetachedFromActivityForConfigChanges() {
-
-    }
-
-    @Override
-    public void onReattachedToActivityForConfigChanges(ActivityPluginBinding binding) {
-    }
-
-    @Override
-    public void onDetachedFromActivity() {
-        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -189,25 +148,13 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
         }
     }
 
-    /*权限申请*/
-    private boolean requestPermissions() {
-        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !EasyPermissions.hasPermissions(this.context, perms)) {
-            EasyPermissions.requestPermissions(this.activity, "需要获取相册权限", REQUEST_PERMISSION, perms);
-            return false;
-        }
-        return true;
-    }
-
     /*获取相册资源*/
     private void getAblumData(boolean asc, boolean image, boolean video, int maxCount) {
         this.asc = asc;
         this.maxCount = maxCount;
         this.image = image;
         this.video = video;
-        if (requestPermissions()) {
-            getAblumData(asc, image, video, maxCount, null);
-        }
+        getAblumData(asc, image, video, maxCount, null);
     }
 
     /*获取相册资源*/
@@ -269,18 +216,15 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
             int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
             String localIdentifier = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
             String creationDate = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
-            File file = new File(path);
-            if (file.exists()) {
-                AlbumModelEntity imgEntity = new AlbumModelEntity(creationDate, size, null, path, null, RESOURCE_IMAGE, localIdentifier, id);
+            String thumbnail = getImageSystemThumbnail(id);
+            if (thumbnail == null) {
                 Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
                 if (bitmap != null) {
-                    String thumbPath = saveBitmap(this.context, bitmap, localIdentifier);
-                    if (thumbPath != null) {
-                        imgEntity.setThumbPath(thumbPath);
-                    }
+                    thumbnail = saveBitmap(this.context, bitmap, localIdentifier);
                 }
-                result.add(imgEntity);
             }
+            AlbumModelEntity imgEntity = new AlbumModelEntity(creationDate, size, thumbnail, path, null, RESOURCE_IMAGE, localIdentifier, id);
+            result.add(imgEntity);
             //获取maxCount固定数值 maxCount <= 0 表示全部
             if (maxCount > 0 && result.size() == maxCount) {
                 cursor.close();
@@ -312,18 +256,15 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
             int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
             String localIdentifier = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
             String creationDate = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
-            File file = new File(path);
-            if (file.exists()) {
-                AlbumModelEntity videoEntity = new AlbumModelEntity(creationDate, size, null, path, duration, RESOURCE_VIDEO, localIdentifier, id);
+            String thumbnail = getVideoSystemThumbnail(id);
+            if (thumbnail == null) {
                 Bitmap bitmap = MediaStore.Video.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Video.Thumbnails.MICRO_KIND, null);
                 if (bitmap != null) {
-                    String thumbPath = saveBitmap(this.context, bitmap, localIdentifier);
-                    if (thumbPath != null) {
-                        videoEntity.setThumbPath(thumbPath);
-                    }
+                    thumbnail = saveBitmap(this.context, bitmap, localIdentifier);
                 }
-                result.add(videoEntity);
             }
+            AlbumModelEntity videoEntity = new AlbumModelEntity(creationDate, size, thumbnail, path, duration, RESOURCE_VIDEO, localIdentifier, id);
+            result.add(videoEntity);
             //获取maxCount固定数值 maxCount <= 0 表示全部
             if (maxCount > 0 && result.size() == maxCount) {
                 cursor.close();
@@ -332,6 +273,44 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
         }
         cursor.close();
         return result;
+    }
+
+    /*获取系统图片缩略图*/
+    private String getImageSystemThumbnail(int imageId) {
+        String thumbnail = null;
+        ContentResolver cr = this.context.getContentResolver();
+        Cursor cursor = cr.query(
+                MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI,
+                new String[]{
+                        MediaStore.Images.Thumbnails.DATA
+                },
+                MediaStore.Images.Thumbnails.IMAGE_ID + "=" + imageId,
+                null,
+                null);
+        if (cursor != null && cursor.moveToFirst()) {
+            thumbnail = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+            cursor.close();
+        }
+        return thumbnail;
+    }
+
+    /*获取系统视频缩略图*/
+    private String getVideoSystemThumbnail(int videoId) {
+        String thumbnail = null;
+        ContentResolver cr = this.context.getContentResolver();
+        Cursor cursor = cr.query(
+                MediaStore.Video.Thumbnails.EXTERNAL_CONTENT_URI,
+                new String[]{
+                        MediaStore.Video.Thumbnails.DATA
+                },
+                MediaStore.Video.Thumbnails.VIDEO_ID + "=" + videoId,
+                null,
+                null);
+        if (cursor != null && cursor.moveToFirst()) {
+            thumbnail = cursor.getString(cursor.getColumnIndex(MediaStore.Video.Media.DATA));
+            cursor.close();
+        }
+        return thumbnail;
     }
 
     /*保存Bitmap到本地返回图片路径*/
@@ -351,15 +330,16 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
             if (!filePic.exists()) {
                 filePic.getParentFile().mkdirs();
                 filePic.createNewFile();
+                FileOutputStream fos = new FileOutputStream(filePic);
+                mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                fos.flush();
+                fos.close();
             }
-            FileOutputStream fos = new FileOutputStream(filePic);
-            mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-            fos.flush();
-            fos.close();
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
         return filePic.getAbsolutePath();
     }
+
 }

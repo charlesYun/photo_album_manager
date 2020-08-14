@@ -5,68 +5,44 @@ This is the plug-in can quickly get album resources, support for android and iOS
 
 这是可以快速获取相册资源的插件，支持安卓和iOS
 
-## example
-安卓
+## demo
 ![二维码](https://www.pgyer.com/app/qrcode/SFcx?sign=&auSign=&code=)
 
 ## install
-
-```yaml
-dependencies:
-photo_album_manager: ^1.1.4
+```dart
+dependencies: photo_album_manager: ^1.1.7
 ```
 
 ## import
-
 ```dart
 import 'package:photo_album_manager/photo_album_manager.dart';
 ```
 
-## use
+## example
+```dart
+//先权限申请
+PermissionStatus status = await PhotoAlbumManager.checkPermissions();
+if (status == PermissionStatus.granted) {
+  Toast.show("权限同意", context);
+} else {
+  Toast.show("权限拒绝", context);
+}
+//再获取相册资源
+List<AlbumModelEntity> photos = await PhotoAlbumManager.getDescAlbum(maxCount: 50);
+```
 
 ```dart
-安卓注意：如果没有自己提前申请相册权限需要添加以下操作，参考项目中的example
+//或者直接获取相册资源（权限内部判断）
+List<AlbumModelEntity> photos = await PhotoAlbumManager.getDescAlbum(maxCount: 50);
+```
 
-1、EasyPermissions and EventBus is installed by adding the following dependency to your build.gradle file:
+## api
+```dart
+/*检查必要权限*/
+static Future<PermissionStatus> checkPermissions();
 
-dependencies {
-    // For developers using AndroidX in their applications
-    implementation 'pub.devrel:easypermissions:3.0.0'
- 
-    // For developers using the Android Support Library
-    implementation 'pub.devrel:easypermissions:2.0.1'
-    
-    implementation 'org.greenrobot:eventbus:3.2.0'
-}
-
-2、MainActivity类修改
-
-public class MainActivity extends FlutterActivity implements EasyPermissions.PermissionCallbacks  {
-  @Override
-  public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
-    GeneratedPluginRegistrant.registerWith(flutterEngine);
-  }
-
-  @Override
-  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-    EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this);
-  }
-
-  /*权限通过*/
-  @Override
-  public void onPermissionsGranted(int requestCode, @NonNull List<String> perms) {
-    EventBus.getDefault().post(new MessageEvent());
-  }
-
-  /*权限拒绝*/
-  @Override
-  public void onPermissionsDenied(int requestCode, @NonNull List<String> perms) {
-  
-  }
-}
-
-/*主要方法如下*/
+/*判断权限状态是否授予*/
+static bool statusIsGranted(PermissionStatus status);
 
 /*获取相册资源(降序) maxCount 为null 获取全部资源*/
 static Future<List<AlbumModelEntity>> getDescAlbum({int maxCount});
@@ -87,67 +63,45 @@ static Future<List<AlbumModelEntity>> getDescAlbumImg({int maxCount});
 static Future<List<AlbumModelEntity>> getDescAlbumVideo{int maxCount});
 
 /*通过唯一标识localIdentifier 获取资源（原图、原视频）*/
-static Future<AlbumModelEntity> getOriginalImg(String localIdentifier,
+static Future<AlbumModelEntity> getOriginalResource(String localIdentifier,
 {void onProgress(double progress), void onError(String error)});
 ```
 
-## android warning
-```dart
-执行 flutter build apk 如果抛出如下警告
-警告: 未知的枚举常量 ThreadMode.POSTING      
-  原因: 找不到org.greenrobot.eventbus.ThreadMode的类文件 
-  1 个警告 
-(代码混淆问题)
-
-参考example/android 项目
-1、把app目录下的proguard-rules.pro文件拷贝过去
-2、在build.gradle/buildTypes/release里面添加
-proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-```
-
 ## log
-
 ```dart
+1.1.7 版本更新内容
+*优化安卓获取缩略图代码
+
+1.1.6 版本更新内容
+*优化安卓获取缩略图代码
+
+1.1.5 版本更新内容
+*优化权限相关
+
 1.1.4 版本更新内容
 *优化pubspec.yaml文件部分语法问题
-```
 
-```dart
 1.1.3 版本更新内容
 *优化安卓插件EventBus 因混淆导致的release版本异常
-```
 
-```dart
 1.1.2 版本更新内容
 *优化iOS相册加载速度
-```
 
-```dart
 1.1.1 版本更新内容
 *优化安卓端第一次相册权限申请后无法获取数据问题
-```
 
-```dart
 1.1.0 版本更新内容
 *优化安卓端相册权限申请
-```
 
-```dart
 1.0.9 版本更新内容
 *优化安卓端相册权限申请
-```
 
-```dart
 1.0.8 版本更新内容
 *适配版本v1.12.13+hotfix.9
-```
 
-```dart
 1.0.7 版本更新内容
 *优化Android端缓存问题
-```
 
-```dart
 1.0.6 版本更新内容
 *优化iOS端GIF支持问题
 *优化iOS端HEIC格式图片转换JPG问题
