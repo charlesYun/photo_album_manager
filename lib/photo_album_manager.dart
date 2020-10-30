@@ -7,7 +7,6 @@ import 'album_model_entity.dart';
 export 'album_model_entity.dart';
 export 'package:permission_handler/permission_handler.dart';
 
-
 class PhotoAlbumManager {
   /*flutter主动调用交互*/
   static const MethodChannel _channel =
@@ -137,7 +136,11 @@ class PhotoAlbumManager {
       List list =
           await _channel.invokeMethod('getOriginalResource', localIdentifier);
       List<AlbumModelEntity> album = List();
-      list.forEach((item) => album.add(AlbumModelEntity.fromJson(item)));
+      try {
+        list.forEach((item) => album.add(AlbumModelEntity.fromJson(item)));
+      } catch (error) {
+        onError(error);
+      }
       return album.first;
     }
   }

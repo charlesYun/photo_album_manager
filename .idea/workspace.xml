@@ -5,36 +5,42 @@
       <config />
     </shared>
   </component>
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="NONE" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="69efb0b9-93bd-45e1-8eb4-6c80a591faf2" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/libraries/Flutter_Plugins.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/ios/.symlinks/plugins/photo_album_manager/.idea/libraries/Flutter_Plugins.xml" beforeDir="false" afterPath="$PROJECT_DIR$/example/ios/.symlinks/plugins/photo_album_manager/.idea/libraries/Flutter_Plugins.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/ios/.symlinks/plugins/photo_album_manager/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/example/ios/.symlinks/plugins/photo_album_manager/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/ios/.symlinks/plugins/photo_album_manager/example/ios/Flutter/flutter_export_environment.sh" beforeDir="false" afterPath="$PROJECT_DIR$/example/ios/.symlinks/plugins/photo_album_manager/example/ios/Flutter/flutter_export_environment.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/ios/.symlinks/plugins/photo_album_manager/example/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/example/ios/.symlinks/plugins/photo_album_manager/example/pubspec.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/example/ios/.symlinks/plugins/photo_album_manager/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/example/ios/.symlinks/plugins/photo_album_manager/pubspec.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/example/ios/Flutter/flutter_export_environment.sh" beforeDir="false" afterPath="$PROJECT_DIR$/example/ios/Flutter/flutter_export_environment.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/example/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/example/pubspec.lock" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/photo_album_manager.iml" beforeDir="false" afterPath="$PROJECT_DIR$/photo_album_manager.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/pubspec.lock" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pubspec.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/pubspec.yaml" afterDir="false" />
     </list>
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="Nexus_5X_API_28" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[3870b3fc]" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProjectId" id="1aNPKzpVkCLpuPhISYaaI3WHjoe" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
   <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="dart.analysis.tool.window.force.activate" value="false" />
+    <property name="dart.analysis.tool.window.visible" value="false" />
     <property name="io.flutter.reload.alreadyRun" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="project.propVCSSupport.Mappings" />
     <property name="show.migrate.to.gradle.popup" value="false" />
   </component>
   <component name="RecentsManager">
@@ -42,18 +48,6 @@
       <recent name="$PROJECT_DIR$/ios/Classes" />
       <recent name="$PROJECT_DIR$/lib" />
     </key>
-  </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
   </component>
   <component name="SvnConfiguration">
     <configuration />
@@ -73,12 +67,41 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State>
-              <option name="COLUMN_ORDER" />
-            </State>
+            <State />
           </value>
         </entry>
       </map>
     </option>
+    <option name="oldMeFiltersMigrated" value="true" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="337" y="65" key="#Plugins" timestamp="1602905971389">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state x="337" y="65" key="#Plugins/0.23.1440.828@0.23.1440.828" timestamp="1602905971389" />
+    <state x="201" y="79" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1602905850558">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state x="201" y="79" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.23.1440.828@0.23.1440.828" timestamp="1602905850558" />
+    <state width="679" height="159" key="GridCell.Tab.0.bottom" timestamp="1602908059732">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state width="679" height="159" key="GridCell.Tab.0.bottom/0.23.1440.828@0.23.1440.828" timestamp="1602908059732" />
+    <state width="679" height="159" key="GridCell.Tab.0.center" timestamp="1602908059732">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state width="679" height="159" key="GridCell.Tab.0.center/0.23.1440.828@0.23.1440.828" timestamp="1602908059732" />
+    <state width="679" height="159" key="GridCell.Tab.0.left" timestamp="1602908059729">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state width="679" height="159" key="GridCell.Tab.0.left/0.23.1440.828@0.23.1440.828" timestamp="1602908059729" />
+    <state width="679" height="159" key="GridCell.Tab.0.right" timestamp="1602908059732">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state width="679" height="159" key="GridCell.Tab.0.right/0.23.1440.828@0.23.1440.828" timestamp="1602908059732" />
+    <state x="156" y="69" key="SettingsEditor" timestamp="1602905960950">
+      <screen x="0" y="23" width="1440" height="828" />
+    </state>
+    <state x="156" y="69" key="SettingsEditor/0.23.1440.828@0.23.1440.828" timestamp="1602905960950" />
   </component>
 </project>

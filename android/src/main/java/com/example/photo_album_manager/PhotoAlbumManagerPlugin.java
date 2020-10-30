@@ -2,14 +2,19 @@ package com.example.photo_album_manager;
 
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
 
 import androidx.annotation.NonNull;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -72,6 +77,19 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
 
     @Override
     public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
+        //刷新MediaStore
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            Intent mediaScanIntent = new Intent(
+                    Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            Uri contentUri = Uri.fromFile(Environment.getExternalStorageDirectory());
+            mediaScanIntent.setData(contentUri);
+            context.sendBroadcast(mediaScanIntent);
+        } else {
+            context.sendBroadcast(new Intent(
+                    Intent.ACTION_MEDIA_MOUNTED,
+                    Uri.parse("file://"
+                            + Environment.getExternalStorageDirectory())));
+        }
         switch (call.method) {
             case "getDescAlbum": {
                 //逆序获取相册资源
@@ -158,7 +176,7 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
     }
 
     /*获取相册资源*/
-    private void getAblumData(boolean asc, boolean image, boolean video, int maxCount, String localIdentifier) {
+    private void getAblumData(final boolean asc, final boolean image, final boolean video, final int maxCount, final String localIdentifier) {
         List<AlbumModelEntity> albumList = new ArrayList<>();
         if (image) {
             List<AlbumModelEntity> images = getSystemPhotoList(asc, maxCount, localIdentifier);
@@ -193,7 +211,7 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
         for (AlbumModelEntity entity : albumList) {
             mapList.add(entity.toMap());
         }
-        this.result.success(mapList);
+        result.success(mapList);
     }
 
     /*获取相册图片资源*/
