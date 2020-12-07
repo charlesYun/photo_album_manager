@@ -69,6 +69,9 @@ static Future<AlbumModelEntity> getOriginalResource(String localIdentifier,
 
 ## log
 ```dart
+1.1.9 版本更新内容
+*优化安卓相册缓存更新不及时问题
+
 1.1.8 版本更新内容
 *优化安卓相册缓存更新不及时问题
 

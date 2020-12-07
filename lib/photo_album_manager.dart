@@ -135,6 +135,10 @@ class PhotoAlbumManager {
     } else {
       List list =
           await _channel.invokeMethod('getOriginalResource', localIdentifier);
+      if (list.isEmpty) {
+        onError("加载失败，请重试");
+        return null;
+      }
       List<AlbumModelEntity> album = List();
       try {
         list.forEach((item) => album.add(AlbumModelEntity.fromJson(item)));
