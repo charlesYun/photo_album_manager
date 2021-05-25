@@ -236,9 +236,14 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
             String creationDate = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
             String thumbnail = getImageSystemThumbnail(id);
             if (thumbnail == null) {
-                Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
-                if (bitmap != null) {
-                    thumbnail = saveBitmap(this.context, bitmap, localIdentifier);
+                File picFile = thumbnailPicFile(this.context, localIdentifier);
+                if (!picFile.exists()) {
+                    Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
+                    if (bitmap != null) {
+                        thumbnail = saveBitmap(this.context, bitmap, localIdentifier);
+                    }
+                } else {
+                    thumbnail = picFile.getAbsolutePath();
                 }
             }
             AlbumModelEntity imgEntity = new AlbumModelEntity(creationDate, size, thumbnail, path, null, RESOURCE_IMAGE, localIdentifier, id);
@@ -276,9 +281,14 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
             String creationDate = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
             String thumbnail = getVideoSystemThumbnail(id);
             if (thumbnail == null) {
-                Bitmap bitmap = MediaStore.Video.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Video.Thumbnails.MICRO_KIND, null);
-                if (bitmap != null) {
-                    thumbnail = saveBitmap(this.context, bitmap, localIdentifier);
+                File picFile = thumbnailPicFile(this.context, localIdentifier);
+                if (!picFile.exists()) {
+                    Bitmap bitmap = MediaStore.Video.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Video.Thumbnails.MICRO_KIND, null);
+                    if (bitmap != null) {
+                        thumbnail = saveBitmap(this.context, bitmap, localIdentifier);
+                    }
+                } else {
+                    thumbnail = picFile.getAbsolutePath();
                 }
             }
             AlbumModelEntity videoEntity = new AlbumModelEntity(creationDate, size, thumbnail, path, duration, RESOURCE_VIDEO, localIdentifier, id);
@@ -334,17 +344,8 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
     /*保存Bitmap到本地返回图片路径*/
     private static String saveBitmap(Context context, Bitmap mBitmap, String localIdentifier) {
         String savePath;
-        File filePic;
-        if (Environment.getExternalStorageState().equals(
-                Environment.MEDIA_MOUNTED)) {
-            savePath = Environment.getExternalStorageDirectory().getAbsolutePath() + IN_PATH;
-        } else {
-            savePath = context.getApplicationContext().getFilesDir()
-                    .getAbsolutePath()
-                    + IN_PATH;
-        }
+        File filePic = thumbnailPicFile(context, localIdentifier);
         try {
-            filePic = new File(savePath + localIdentifier + ".jpg");
             if (!filePic.exists()) {
                 filePic.getParentFile().mkdirs();
                 filePic.createNewFile();
@@ -358,6 +359,21 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
             return null;
         }
         return filePic.getAbsolutePath();
+    }
+
+    /*本地路径拼接*/
+    private static File thumbnailPicFile(Context context, String localIdentifier) {
+        String savePath;
+        if (Environment.getExternalStorageState().equals(
+                Environment.MEDIA_MOUNTED)) {
+            savePath = Environment.getExternalStorageDirectory().getAbsolutePath() + IN_PATH;
+        } else {
+            savePath = context.getApplicationContext().getFilesDir()
+                    .getAbsolutePath()
+                    + IN_PATH;
+        }
+        File filePic = new File(savePath + localIdentifier + ".jpg");
+        return filePic;
     }
 
 }

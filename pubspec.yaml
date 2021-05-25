@@ -1,18 +1,17 @@
 name: photo_album_manager
 description: This is the plug-in can quickly get album resources, support for android and iOS
-version: 1.1.9
+version: 1.2.0
 homepage: https://github.com/caoyunxiao/photo_album_manager.git
 
 environment:
-  sdk: ">=2.1.0 <3.0.0"
+  sdk: ">=2.12.0 <3.0.0"
   flutter: ^1.10.0
-
 
 dependencies:
   flutter:
     sdk: flutter
 
-  permission_handler: ^5.0.1+1
+  permission_handler: ^7.1.0
 
 dev_dependencies:
   flutter_test:
@@ -34,6 +33,3 @@ flutter:
         pluginClass: PhotoAlbumManagerPlugin
       ios:
         pluginClass: PhotoAlbumManagerPlugin
-
-
-  

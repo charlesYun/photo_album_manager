@@ -34,11 +34,11 @@ class PhotoAlbumManager {
   }
 
   /*获取相册资源(降序) maxCount 为null 获取全部资源*/
-  static Future<List<AlbumModelEntity>> getDescAlbum({int maxCount}) async {
+  static Future<List<AlbumModelEntity>> getDescAlbum({int? maxCount}) async {
     PermissionStatus status = await checkPermissions();
     if (statusIsGranted(status)) {
       List list = await _channel.invokeMethod('getDescAlbum', maxCount);
-      List<AlbumModelEntity> album = List();
+      List<AlbumModelEntity> album = <AlbumModelEntity>[];
       list.forEach((item) => album.add(AlbumModelEntity.fromJson(item)));
       return album;
     } else {
@@ -47,11 +47,11 @@ class PhotoAlbumManager {
   }
 
   /*获取相册资源(升序) maxCount 为null 获取全部资源*/
-  static Future<List<AlbumModelEntity>> getAscAlbum({int maxCount}) async {
+  static Future<List<AlbumModelEntity>> getAscAlbum({int? maxCount}) async {
     PermissionStatus status = await checkPermissions();
     if (statusIsGranted(status)) {
       List list = await _channel.invokeMethod('getAscAlbum', maxCount);
-      List<AlbumModelEntity> album = List();
+      List<AlbumModelEntity> album = <AlbumModelEntity>[];
       list.forEach((item) => album.add(AlbumModelEntity.fromJson(item)));
       return album;
     } else {
@@ -60,11 +60,11 @@ class PhotoAlbumManager {
   }
 
   /*获取相册图片资源(升序) maxCount 为null 获取全部资源*/
-  static Future<List<AlbumModelEntity>> getAscAlbumImg({int maxCount}) async {
+  static Future<List<AlbumModelEntity>> getAscAlbumImg({int? maxCount}) async {
     PermissionStatus status = await checkPermissions();
     if (statusIsGranted(status)) {
       List list = await _channel.invokeMethod('getAscAlbumImg', maxCount);
-      List<AlbumModelEntity> album = List();
+      List<AlbumModelEntity> album = <AlbumModelEntity>[];
       list.forEach((item) => album.add(AlbumModelEntity.fromJson(item)));
       return album;
     } else {
@@ -73,11 +73,12 @@ class PhotoAlbumManager {
   }
 
   /*获取相册视频资源(升序) maxCount 为null 获取全部资源*/
-  static Future<List<AlbumModelEntity>> getAscAlbumVideo({int maxCount}) async {
+  static Future<List<AlbumModelEntity>> getAscAlbumVideo(
+      {int? maxCount}) async {
     PermissionStatus status = await checkPermissions();
     if (statusIsGranted(status)) {
       List list = await _channel.invokeMethod('getAscAlbumVideo', maxCount);
-      List<AlbumModelEntity> album = List();
+      List<AlbumModelEntity> album = <AlbumModelEntity>[];
       list.forEach((item) => album.add(AlbumModelEntity.fromJson(item)));
       return album;
     } else {
@@ -86,11 +87,11 @@ class PhotoAlbumManager {
   }
 
   /*获取相册图片资源(降序) maxCount 为null 获取全部资源*/
-  static Future<List<AlbumModelEntity>> getDescAlbumImg({int maxCount}) async {
+  static Future<List<AlbumModelEntity>> getDescAlbumImg({int? maxCount}) async {
     PermissionStatus status = await checkPermissions();
     if (statusIsGranted(status)) {
       List list = await _channel.invokeMethod('getDescAlbumImg', maxCount);
-      List<AlbumModelEntity> album = List();
+      List<AlbumModelEntity> album = <AlbumModelEntity>[];
       list.forEach((item) => album.add(AlbumModelEntity.fromJson(item)));
       return album;
     } else {
@@ -100,11 +101,11 @@ class PhotoAlbumManager {
 
   /*获取相册视频资源(降序) maxCount 为null 获取全部资源*/
   static Future<List<AlbumModelEntity>> getDescAlbumVideo(
-      {int maxCount}) async {
+      {int? maxCount}) async {
     PermissionStatus status = await checkPermissions();
     if (statusIsGranted(status)) {
       List list = await _channel.invokeMethod('getDescAlbumVideo', maxCount);
-      List<AlbumModelEntity> album = List();
+      List<AlbumModelEntity> album = <AlbumModelEntity>[];
       list.forEach((item) => album.add(AlbumModelEntity.fromJson(item)));
       return album;
     } else {
@@ -113,21 +114,27 @@ class PhotoAlbumManager {
   }
 
   /*通过唯一标识localIdentifier 获取资源（原图、原视频）*/
-  static Future<AlbumModelEntity> getOriginalResource(String localIdentifier,
-      {void onProgress(double progress), void onError(String error)}) async {
+  static Future<AlbumModelEntity?> getOriginalResource(String localIdentifier,
+      {void onProgress(double progress)?, void onError(String error)?}) async {
     if (Platform.isIOS) {
       //监听加载进度
-      _eventChannel.receiveBroadcastStream().listen((Object object) {
+      _eventChannel.receiveBroadcastStream().listen((Object? object) {
         if (object is double) {
-          onProgress(object);
+          if (onProgress != null) {
+            onProgress(object);
+          }
         } else {
-          onError(object);
+          if (onError != null) {
+            onError(object.toString());
+          }
         }
       });
       List list =
           await _channel.invokeMethod('getOriginalResource', localIdentifier);
-      if (list == null && list.length == 0) {
-        onError("加载失败，请重试");
+      if (list.length == 0) {
+        if (onError != null) {
+          onError("加载失败，请重试");
+        }
         return null;
       }
       AlbumModelEntity model = AlbumModelEntity.fromJson(list.first);
@@ -135,15 +142,19 @@ class PhotoAlbumManager {
     } else {
       List list =
           await _channel.invokeMethod('getOriginalResource', localIdentifier);
-      if (list.isEmpty) {
-        onError("加载失败，请重试");
+      if (list.length == 0) {
+        if (onError != null) {
+          onError("加载失败，请重试");
+        }
         return null;
       }
-      List<AlbumModelEntity> album = List();
+      List<AlbumModelEntity> album = <AlbumModelEntity>[];
       try {
         list.forEach((item) => album.add(AlbumModelEntity.fromJson(item)));
       } catch (error) {
-        onError(error);
+        if (onError != null) {
+          onError(error.toString());
+        }
       }
       return album.first;
     }

@@ -1,27 +1,24 @@
-
-
-
 class AlbumModelEntity {
   /*视频时长(秒)*/
-  String videoDuration;
+  String? videoDuration;
 
   /*资源大小*/
-  String resourceSize;
+  String? resourceSize;
 
   /*缩略图路径或视频第一帧图片路径*/
-  String thumbPath;
+  String? thumbPath;
 
   /*资源路径*/
-  String originalPath;
+  String? originalPath;
 
   /*创建时间*/
-  String creationDate;
+  String? creationDate;
 
   /*资源类型 image 或 video 或 gif*/
-  String resourceType;
+  String? resourceType;
 
   /*资源唯一标识(下载原图或原视频使用)*/
-  String localIdentifier;
+  String? localIdentifier;
 
   AlbumModelEntity(
       {this.videoDuration,
@@ -30,7 +27,7 @@ class AlbumModelEntity {
       this.originalPath,
       this.creationDate,
       this.resourceType,
-      this.localIdentifier});
+        this.localIdentifier});
 
   AlbumModelEntity.fromJson(Map<dynamic, dynamic> json) {
     videoDuration = json['videoDuration'];
