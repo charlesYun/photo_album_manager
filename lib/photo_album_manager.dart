@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:io';
+import 'dart:io' show Platform;
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'album_model_entity.dart';
@@ -71,6 +71,20 @@ class PhotoAlbumManager {
       return Future.error(status);
     }
   }
+
+  /*快速获取相册图片资源（需调用getPhotoData来获取图片二进制数据） (升序) maxCount 为null 获取全部资源, */
+  static Future<List<AlbumModelEntity>> getAscAlbumImgFast({int? maxCount}) async {
+    PermissionStatus status = await checkPermissions();
+    if (statusIsGranted(status)) {
+      List list = await _channel.invokeMethod('getAscAlbumImgFast', maxCount);
+      List<AlbumModelEntity> album = <AlbumModelEntity>[];
+      list.forEach((item) => album.add(AlbumModelEntity.fromJson(item)));
+      return album;
+    } else {
+      return Future.error(status);
+    }
+  }
+
 
   /*获取相册视频资源(升序) maxCount 为null 获取全部资源*/
   static Future<List<AlbumModelEntity>> getAscAlbumVideo(
@@ -157,6 +171,17 @@ class PhotoAlbumManager {
         }
       }
       return album.first;
+    }
+  }
+
+  /*通过唯一标识localIdentifier 获取二进制资源（原图）*/
+  static Future<dynamic> getPhotoData(String localIdentifier) async {
+    if (Platform.isIOS) {
+      dynamic photoData =
+      await _channel.invokeMethod('getPhotoData', localIdentifier);
+      return photoData;
+    } else {
+      return null;
     }
   }
 }
