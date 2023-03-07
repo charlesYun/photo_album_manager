@@ -1,6 +1,6 @@
 name: photo_album_manager
 description: This is the plug-in can quickly get album resources, support for android and iOS
-version: 1.2.0
+version: 1.3.0
 homepage: https://github.com/caoyunxiao/photo_album_manager.git
 
 environment:
