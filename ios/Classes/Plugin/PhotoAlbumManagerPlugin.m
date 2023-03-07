@@ -1,4 +1,5 @@
 #import "PhotoAlbumManagerPlugin.h"
+#import "ImageManager.h"
 #import <Photos/Photos.h>
 #import <MobileCoreServices/UTCoreTypes.h>
 #import "AlbumModelEntity.h"
@@ -48,6 +49,10 @@ typedef void (^FlutterResult)(id _Nullable result);
 #pragma mark - 获取相册资源（图片） maxCount最大个数
 - (void)getAlbumDataAsc:(BOOL)asc maxCount:(NSInteger)maxCount image:(BOOL)image {
     [self getAlbumDataAsc:asc maxCount:maxCount image:image video:NO localIdentifier:nil];
+}
+
+- (void)getAlbumDataAscFast:(BOOL)asc maxCount:(NSInteger)maxCount image:(BOOL)image {
+    [self getAlbumDataAscFast:asc maxCount:maxCount image:image video:NO localIdentifier:nil];
 }
 
 #pragma mark - 获取相册资源（图片、视频） maxCount最大个数
@@ -121,6 +126,48 @@ typedef void (^FlutterResult)(id _Nullable result);
         }
     }];
 }
+
+#pragma mark - 快速获取相册资源 asc 是否升序 maxCount 最大资源数 image 是否加载图片 video 是否加载视频 localIdentifier PHAsset id单独获取使用
+- (void)getAlbumDataAscFast:(BOOL)asc maxCount:(NSInteger)maxCount image:(BOOL)image video:(BOOL)video localIdentifier:(NSString *)localIdentifier {
+    [PHPhotoLibrary requestAuthorization:^(PHAuthorizationStatus status) {
+        if (status == PHAuthorizationStatusAuthorized) {
+            PHFetchOptions *allPhotosOptions = [[PHFetchOptions alloc] init];
+            allPhotosOptions.sortDescriptors = @[[NSSortDescriptor sortDescriptorWithKey:@"creationDate" ascending:asc]];
+            PHFetchResult *result = nil;
+            if (localIdentifier) {
+                //根据唯一标识符单独获取
+                result = [PHAsset fetchAssetsWithLocalIdentifiers:@[localIdentifier] options:nil];
+                self.imageRequestOption.networkAccessAllowed = YES;
+                self.videoRequestOption.networkAccessAllowed = YES;
+            }else {
+                if (image && !video) {
+                    allPhotosOptions.predicate = [NSPredicate predicateWithFormat:@"mediaType = %d",PHAssetMediaTypeImage];
+                }else if (!image && video) {
+                    allPhotosOptions.predicate = [NSPredicate predicateWithFormat:@"mediaType = %d",PHAssetMediaTypeVideo];
+                }
+                result = [PHAsset fetchAssetsWithOptions:allPhotosOptions];
+                self.imageRequestOption.networkAccessAllowed = NO;
+                self.videoRequestOption.networkAccessAllowed = NO;
+            }
+            [self.albumList removeAllObjects];
+            
+            __weak __typeof(self) weakSelf = self;
+            [self getAssetsFromFetchResult:result localIdentifier:localIdentifier completion:^(NSArray<AlbumModelEntity *> *photos) {
+                __strong typeof(weakSelf) strongSelf = weakSelf;
+                if (strongSelf->_resultBlock) {
+                    NSMutableArray *albums = [NSMutableArray array];
+                    weakSelf.albumList = [NSMutableArray arrayWithArray:photos];
+                    for (AlbumModelEntity *model in self.albumList) {
+                        [albums addObject:[model toDictionary]];
+                    }
+                    weakSelf.resultBlock(albums);
+                }
+                
+            }];
+        }
+    }];
+}
+
 
 #pragma mark - 通过PHAsset 获取资源
 - (void)getResource:(AlbumModelEntity *)model queue:(dispatch_queue_t)queue group:(dispatch_group_t)group localIdentifier:(NSString *)localIdentifier {
@@ -438,7 +485,15 @@ typedef void (^FlutterResult)(id _Nullable result);
             count = [NSString stringWithFormat:@"%@",call.arguments].integerValue;
         }
         [self getAlbumDataAsc:YES maxCount:count image:YES];
-    }else if ([@"getAscAlbumVideo" isEqualToString:call.method]) {
+    } else if ([@"getAscAlbumImgFast" isEqualToString:call.method]) {
+        //顺序获取相册图片
+        self.resultBlock = result;
+        NSInteger count = 0;
+        if (call.arguments) {
+            count = [NSString stringWithFormat:@"%@",call.arguments].integerValue;
+        }
+        [self getAlbumDataAscFast:YES maxCount:(count) image:YES];
+    } else if ([@"getAscAlbumVideo" isEqualToString:call.method]) {
         //顺序获取相册视频
         self.resultBlock = result;
         NSInteger count = 0;
@@ -467,7 +522,13 @@ typedef void (^FlutterResult)(id _Nullable result);
         self.resultBlock = result;
         NSString *localIdentifier = [NSString stringWithFormat:@"%@",call.arguments];
         [self getOriginalResource:localIdentifier];
-    }else {
+    }else if ([@"getPhotoData" isEqualToString:call.method]) {
+        //获取原始资源
+        self.resultBlock = result;
+        NSString *localIdentifier = [NSString stringWithFormat:@"%@",call.arguments];
+        [self getPhotoDataWithLcalIdentify:localIdentifier];
+        
+    } else {
         result(FlutterMethodNotImplemented);
     }
 }
@@ -518,6 +579,51 @@ typedef void (^FlutterResult)(id _Nullable result);
         _albumList = [NSMutableArray array];
     }
     return _albumList;
+}
+
+
+// 获取图片资源
+- (void)getAssetsFromFetchResult:(PHFetchResult *)result localIdentifier:(NSString *)localIdentifier completion:(void (^)(NSArray<AlbumModelEntity *> *))completion {
+    NSMutableArray *photoArr = [NSMutableArray array];
+    [result enumerateObjectsUsingBlock:^(PHAsset *asset, NSUInteger idx, BOOL * _Nonnull stop) {
+        AlbumModelEntity *model = [[AlbumModelEntity alloc] init];
+        model.photoAsset = asset;
+        
+        NSString *assetName = [model.photoAsset valueForKey:@"filename"];
+        BOOL isGif = [self isGif:assetName.pathExtension];
+        assetName = [assetName stringByDeletingPathExtension];
+        model.setLocalIdentifier(model.photoAsset.localIdentifier);
+        [[ImageManager manager].assertDict setValue:model.photoAsset forKey:model.photoAsset.localIdentifier];
+        //资源类型
+        if (model.photoAsset.mediaType == PHAssetMediaTypeImage) {
+            if (isGif) {
+                model.setResourceType(kResourceGif);
+            }else {
+                model.setResourceType(kResourceImg);
+            }
+        }else if (model.photoAsset.mediaType == PHAssetMediaTypeVideo) {
+            model.setResourceType(kResourceVideo);
+        }
+
+        if (model) {
+            [photoArr addObject:model];
+        }
+    }];
+    if (completion) completion(photoArr);
+}
+
+// 获取单张图片的Data数据
+- (void)getPhotoDataWithLcalIdentify:(NSString *)lcalIdentify {
+    PHAsset  *asset = [[ImageManager manager].assertDict objectForKey:lcalIdentify];
+    if (!asset) {
+        return;
+    }
+    CGFloat photoWidth = 125;
+    PHImageRequestID requestId = [[ImageManager manager] getPhotoWithAsset:asset photoWidth:photoWidth completion:^(UIImage * _Nonnull photo, NSDictionary * _Nonnull info, BOOL isDegraded) {
+        NSData *data = UIImagePNGRepresentation(photo);
+        self.resultBlock(data);
+        
+    } progressHandler:nil networkAccessAllowed:YES];
 }
 
 @end
