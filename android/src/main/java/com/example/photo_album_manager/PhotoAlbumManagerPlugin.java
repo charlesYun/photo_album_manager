@@ -10,6 +10,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -172,7 +173,11 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
         this.maxCount = maxCount;
         this.image = image;
         this.video = video;
+
+        long startTime = System.currentTimeMillis();
         getAblumData(asc, image, video, maxCount, null);
+        long endTime = System.currentTimeMillis();
+        Log.i("getAblumData", "方法执行时间：" + (endTime - startTime) + "ms");
     }
 
     /*获取相册资源*/
@@ -217,44 +222,35 @@ public class PhotoAlbumManagerPlugin implements FlutterPlugin, MethodCallHandler
     /*获取相册图片资源*/
     private List<AlbumModelEntity> getSystemPhotoList(boolean asc, int maxCount, String localId) {
         List<AlbumModelEntity> result = new ArrayList<>();
-        //按图片ID降序获取
+
+        // 使用 ContentResolver 获取相册中的所有照片
+        String[] projection = { MediaStore.Images.Media.DATA };
+        String[] thumbProjection = {MediaStore.Images.Thumbnails.DATA};
         ContentResolver contentResolver = this.context.getContentResolver();
-        Cursor cursor;
-        if (localId != null) {
-            cursor = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, MediaStore.Images.Media._ID + " =?", new String[]{localId}, null,
-                    null);
-        } else {
-            cursor = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, null, null, null,
-                    MediaStore.Images.Media._ID + (asc ? " ASC" : " DESC"));
-        }
-        if (cursor == null || cursor.getCount() <= 0) return null;
-        while (cursor.moveToNext()) {
-            String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
-            String size = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
-            int id = cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
-            String localIdentifier = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID));
-            String creationDate = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
-            String thumbnail = getImageSystemThumbnail(id);
-            if (thumbnail == null) {
-                File picFile = thumbnailPicFile(this.context, localIdentifier);
-                if (!picFile.exists()) {
-                    Bitmap bitmap = MediaStore.Images.Thumbnails.getThumbnail(contentResolver, id, MediaStore.Images.Thumbnails.MICRO_KIND, null);
-                    if (bitmap != null) {
-                        thumbnail = saveBitmap(this.context, bitmap, localIdentifier);
-                    }
-                } else {
-                    thumbnail = picFile.getAbsolutePath();
+        Cursor cursor = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, null, null,
+                MediaStore.Images.Media._ID + (asc ? " ASC" : " DESC"));
+        Cursor thumbCursor = contentResolver.query(MediaStore.Images.Thumbnails.EXTERNAL_CONTENT_URI, thumbProjection, null, null, null);
+        if (cursor == null || cursor.getCount() <= 0 || thumbCursor == null || thumbCursor.getCount() <= 0 ) return null;
+        // 遍历 cursor，将所有照片路径添加到 photoPaths 数组中
+        if (cursor != null && thumbCursor != null) {
+            while (cursor.moveToNext() && thumbCursor.moveToNext()) {
+                String photoPath = cursor.getString(cursor.getColumnIndex(MediaStore.Images.Media.DATA));
+                String thumbnailPath = thumbCursor.getString(thumbCursor.getColumnIndex(MediaStore.Images.Thumbnails.DATA));
+                AlbumModelEntity imgEntity = new AlbumModelEntity(null, null, thumbnailPath, photoPath, null, RESOURCE_IMAGE, null, 0);
+                result.add(imgEntity);
+                //获取maxCount固定数值 maxCount <= 0 表示全部
+                if (maxCount > 0 && result.size() == maxCount) {
+                    cursor.close();
+                    thumbCursor.close();
+                    return result;
                 }
             }
-            AlbumModelEntity imgEntity = new AlbumModelEntity(creationDate, size, thumbnail, path, null, RESOURCE_IMAGE, localIdentifier, id);
-            result.add(imgEntity);
-            //获取maxCount固定数值 maxCount <= 0 表示全部
-            if (maxCount > 0 && result.size() == maxCount) {
-                cursor.close();
-                return result;
-            }
+            cursor.close();
+            thumbCursor.close();
+            return result;
         }
         cursor.close();
+        thumbCursor.close();
         return result;
     }
 
